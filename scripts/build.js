@@ -1,29 +1,18 @@
-#!/usr/bin/env node
-const { execSync } = require('child_process');
+// Build with esbuild, marking telegraf as external
+const esbuild = require('esbuild');
+const path = require('path');
 
-function run(cmd) {
-  console.log('> ', cmd);
-  execSync(cmd, { stdio: 'inherit' });
-}
-
-// parse --mode=both|bundle|perfile (default both)
-const arg = process.argv.slice(2).find(a => a.startsWith('--mode='));
-const mode = arg ? arg.split('=')[1] : 'both';
-
-if (!['both', 'bundle', 'perfile'].includes(mode)) {
-  console.error('Invalid mode:', mode);
-  process.exit(2);
-}
-
-try {
-  if (mode === 'both' || mode === 'perfile') {
-    run('node scripts/build-obfuscate.js');
-  }
-  if (mode === 'both' || mode === 'bundle') {
-    run('node scripts/build-bundle.js');
-  }
-  console.log('Build finished (mode=' + mode + ').');
-} catch (err) {
-  console.error('Build failed.', err);
+esbuild.build({
+  entryPoints: [path.join(__dirname, '../index.js')],
+  bundle: true,
+  minify: true,
+  platform: 'node',
+  target: ['node16'],
+  outfile: path.join(__dirname, '../dist/bundle-esbuild.js'),
+  external: ['telegraf'], // Do not bundle telegraf
+}).then(() => {
+  console.log('esbuild bundle complete (telegraf external).');
+}).catch((e) => {
+  console.error(e);
   process.exit(1);
-}
+});
