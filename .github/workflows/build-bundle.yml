@@ -37,6 +37,7 @@ jobs:
         run: |
           if [ ! -f dist/bundle.js ]; then echo "dist/bundle.js missing" && ls -la . && exit 1; fi
       - name: Add build label
+        if: github.event_name == 'pull_request'
         uses: actions-ecosystem/action-add-labels@v1
         with:
           labels: build:success
