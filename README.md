@@ -3,6 +3,7 @@
 
 [![Lint](https://github.com/OrithmicSoftware/telegram-comm-agent/actions/workflows/lint.yml/badge.svg)](https://github.com/OrithmicSoftware/telegram-comm-agent/actions/workflows/lint.yml)
 [![Test](https://github.com/OrithmicSoftware/telegram-comm-agent/actions/workflows/test.yml/badge.svg)](https://github.com/OrithmicSoftware/telegram-comm-agent/actions/workflows/test.yml)
+[![Build Bundle](https://github.com/OrithmicSoftware/telegram-comm-agent/actions/workflows/build-bundle.yml/badge.svg)](https://github.com/OrithmicSoftware/telegram-comm-agent/actions/workflows/build-bundle.yml)
 
 A reusable, fully-configurable Telegram communication agent bot library for Node.js, based on Telegraf. Designed for rapid onboarding, localization, and integration in any project.
 
