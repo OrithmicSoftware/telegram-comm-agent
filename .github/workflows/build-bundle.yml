@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main, master ]
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   build-bundle:
     runs-on: ubuntu-latest
@@ -32,3 +36,7 @@ jobs:
       - name: Verify bundle exists
         run: |
           if [ ! -f dist/bundle.js ]; then echo "dist/bundle.js missing" && ls -la . && exit 1; fi
+      - name: Add build label
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: build:success
