@@ -1,0 +1,14 @@
+{
+  "name": "telegram-comm-agent",
+  "version": "1.0.0",
+  "description": "Generic, configurable Telegram communication agent bot template as a reusable library.",
+  "main": "index.js",
+  "exports": "./index.js",
+  "type": "commonjs",
+  "keywords": ["telegram", "bot", "telegraf", "template", "communication", "agent"],
+  "author": "OrithmicSoftware",
+  "license": "MIT",
+  "dependencies": {
+    "telegraf": "^4.12.2"
+  }
+}
