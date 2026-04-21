@@ -22,7 +22,8 @@
   "scripts": {
     "lint": "eslint .",
     "test": "jest --runInBand",
-    "build:obf": "node scripts/build-obfuscate.js"
+    "build:obf": "node scripts/build-obfuscate.js",
+    "build:bundle": "node scripts/build-bundle.js"
   },
   "dependencies": {
     "telegraf": "^4.16.3",
