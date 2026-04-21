@@ -48,3 +48,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag -a "$TAG" -m "Build succeeded for $GITHUB_SHA"
           git push origin "$TAG"
+      - name: Add build label (PRs)
+        if: github.event_name == 'pull_request' && success()
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: build:success
