@@ -25,14 +25,14 @@ jobs:
         run: npm ci
       - name: Build (bundle)
         run: npm run build --silent -- --mode=bundle
-      - name: Debug: environment
+      - name: "Debug: environment"
         run: |
           node -v
           npm -v
           echo "Working dir: $(pwd)"
           echo "Listing repo root:"
           ls -la
-      - name: Debug: dist contents
+      - name: "Debug: dist contents"
         run: |
           if [ -d dist ]; then ls -la dist; else echo "dist dir missing"; fi
       - name: Verify bundle exists
