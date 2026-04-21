@@ -17,8 +17,8 @@ describe('telegram-comm-agent: Step Flow', () => {
         INVALID_SERVICE: 'Invalid service.',
         LEAD_SENT: 'Lead sent.',
         MSG_SENT: 'Message sent.',
-        LEAD_TEMPLATE: (collected, user) => `Lead: ${collected.service}, ${collected.name}`,
-        MSG_TEMPLATE: (user, text) => `Message: ${text}`,
+        LEAD_TEMPLATE: (collected, _user) => `Lead: ${collected.service}, ${collected.name}`,
+        MSG_TEMPLATE: (_user, text) => `Message: ${text}`,
         APPROVE_BTN: 'Approve',
         REJECT_BTN: 'Reject',
         FLOW: [

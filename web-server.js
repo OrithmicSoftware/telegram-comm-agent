@@ -54,9 +54,17 @@ function createLeadWebServer({ BOT_TOKEN, ADMIN_CHAT_ID, AGENT_CHAT_ID, formatLe
     }
   });
 
-  app.listen(port, () => {
-    console.log(`Web server listening on port ${port}`);
-  });
+  let server = null;
+  if (port !== 0) {
+    server = app.listen(port, () => {
+      console.log(`Web server listening on port ${server.address().port}`);
+    });
+    return server;
+  }
+
+  // When port is 0 (tests), don't start listening to avoid open handles;
+  // return the express app so tests can use supertest(app) without starting a server.
+  console.log('Web server created (not listening) for test app');
   return app;
 }
 

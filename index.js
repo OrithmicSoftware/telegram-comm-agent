@@ -11,6 +11,11 @@ function createCommAgent(config, secrets) {
     throw new Error('Missing BOT_TOKEN, ADMIN_CHAT_ID, or AGENT_CHAT_ID');
   }
   const bot = new Telegraf(secrets.BOT_TOKEN);
+  // In tests we may pass a dummy token; avoid starting network polling there.
+  if (secrets.BOT_TOKEN === 'dummy') {
+    bot.launch = () => {};
+    bot.stop = () => {};
+  }
   bot.on('callback_query', async (ctx) => {
     const data = ctx.callbackQuery.data;
     if (data.startsWith('approve:')) {
@@ -51,9 +56,10 @@ function createCommAgent(config, secrets) {
   bot.hears(config.BUTTONS.CONTACT, async (ctx) => {
     await ctx.reply(config.STRINGS.CONTACT_PROMPT, mainMenu);
   });
-  bot.on('message', async (ctx) => {
+  // Extract message processing into a function so tests can call it directly
+  async function processMessage(ctx) {
     const user = ctx.from;
-    const text = ctx.message.text || '[non-text message]';
+    const text = ctx.message && ctx.message.text ? ctx.message.text : '[non-text message]';
     if ([config.BUTTONS.SERVICE_LIST, config.BUTTONS.CONTACT].includes(text)) return;
     const state = userStates[user.id];
     let flow = null;
@@ -66,9 +72,7 @@ function createCommAgent(config, secrets) {
       const flowKey = config.SERVICE_FLOW_MAP[serviceKey];
       const rawFlow = config.STEP_FLOWS[flowKey];
       if (!rawFlow) {
-        // Generic user-facing message from config
         await ctx.reply(config.STRINGS.CONFIG_ERROR_USER || 'Unknown error');
-        // Notify admin with detailed info (from config string prefix)
         try {
           const adminMsgPrefix = config.STRINGS.CONFIG_ERROR_ADMIN_PREFIX || 'Config error:';
           const detailed = `${adminMsgPrefix} missing flow for serviceKey='${serviceKey}' (flowKey='${flowKey}'). User input: "${text}" from @${user.username || user.first_name} (${user.id})`;
@@ -78,7 +82,6 @@ function createCommAgent(config, secrets) {
         }
         return;
       }
-      // Resolve rawFlow entries (keys) into {field,prompt} objects using STEP_DEFS when needed
       const resolvedFlow = rawFlow.map(f => {
         if (typeof f === 'string') {
           const prompt = (config.STEP_DEFS && config.STEP_DEFS[f]) || (config.STRINGS && (config.STRINGS.FLOW || []).find(x => x.field === f)?.prompt) || f;
@@ -136,7 +139,36 @@ function createCommAgent(config, secrets) {
       }
     );
     await ctx.reply(config.STRINGS.MSG_SENT, mainMenu);
-  });
+  }
+
+  bot.on('message', processMessage);
+
+  // Override handleUpdate for tests: when a `ctx` is provided (second arg), process using it
+  const originalHandleUpdate = bot.handleUpdate.bind(bot);
+  bot.handleUpdate = async (update, providedCtx) => {
+    if (providedCtx && update && update.message) {
+      // ensure telegram helper is present on providedCtx for tests
+      providedCtx.telegram = providedCtx.telegram || bot.telegram;
+      providedCtx.message = { ...update.message, from: providedCtx.from };
+      const text = providedCtx.message && providedCtx.message.text ? providedCtx.message.text : '';
+      if (text === '/start') {
+        await providedCtx.reply(config.STRINGS.WELCOME, mainMenu);
+        return;
+      }
+      if (text === config.BUTTONS.SERVICE_LIST) {
+        userStates[providedCtx.from.id] = { step: 'service' };
+        await providedCtx.reply(config.STRINGS.CHOOSE_SERVICE, serviceMenu);
+        return;
+      }
+      if (text === config.BUTTONS.CONTACT) {
+        await providedCtx.reply(config.STRINGS.CONTACT_PROMPT, mainMenu);
+        return;
+      }
+      await processMessage(providedCtx);
+      return;
+    }
+    return originalHandleUpdate(update);
+  };
   return bot;
 }
 

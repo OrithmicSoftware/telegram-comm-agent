@@ -19,8 +19,8 @@ describe('telegram-comm-agent: Bot Integration', () => {
         INVALID_SERVICE: 'Invalid service.',
         LEAD_SENT: 'Lead sent.',
         MSG_SENT: 'Message sent.',
-        LEAD_TEMPLATE: (collected, user) => `Lead: ${collected.service}, ${collected.name}`,
-        MSG_TEMPLATE: (user, text) => `Message: ${text}`,
+        LEAD_TEMPLATE: (collected, _user) => `Lead: ${collected.service}, ${collected.name}`,
+        MSG_TEMPLATE: (_user, text) => `Message: ${text}`,
         APPROVE_BTN: 'Approve',
         REJECT_BTN: 'Reject',
         FLOW: [
@@ -48,19 +48,19 @@ describe('telegram-comm-agent: Bot Integration', () => {
 
   it('should reply to /start with welcome', async () => {
     const ctx = { reply: jest.fn(), from: { id: userId }, message: { text: '/start' } };
-    await bot.handleUpdate({ message: ctx.message }, ctx);
+    await bot.handleUpdate({ message: { ...ctx.message, from: ctx.from } }, ctx);
     expect(ctx.reply).toHaveBeenCalledWith(config.STRINGS.WELCOME, expect.anything());
   });
 
   it('should handle service selection and flow', async () => {
     const ctx = { reply: jest.fn(), from: { id: userId }, message: { text: config.BUTTONS.SERVICE_LIST } };
-    await bot.handleUpdate({ message: ctx.message }, ctx);
+    await bot.handleUpdate({ message: { ...ctx.message, from: ctx.from } }, ctx);
     expect(ctx.reply).toHaveBeenCalledWith(config.STRINGS.CHOOSE_SERVICE, expect.anything());
   });
 
   it('should handle contact prompt', async () => {
     const ctx = { reply: jest.fn(), from: { id: userId }, message: { text: config.BUTTONS.CONTACT } };
-    await bot.handleUpdate({ message: ctx.message }, ctx);
+    await bot.handleUpdate({ message: { ...ctx.message, from: ctx.from } }, ctx);
     expect(ctx.reply).toHaveBeenCalledWith(config.STRINGS.CONTACT_PROMPT, expect.anything());
   });
 
