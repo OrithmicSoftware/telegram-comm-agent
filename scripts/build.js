@@ -8,10 +8,10 @@ esbuild.build({
   minify: true,
   platform: 'node',
   target: ['node16'],
-  outfile: path.join(__dirname, '../dist/bundle-esbuild.js'),
+  outfile: path.join(__dirname, '../dist/telegram-comm-agent.min.js'),
   external: ['telegraf'], // Do not bundle telegraf
 }).then(() => {
-  console.log('esbuild bundle complete (telegraf external).');
+  console.log('esbuild bundle complete (telegraf external, output: telegram-comm-agent.min.js).');
 }).catch((e) => {
   console.error(e);
   process.exit(1);
