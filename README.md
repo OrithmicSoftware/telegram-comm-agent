@@ -76,37 +76,44 @@ The library provides a built-in Express web server for receiving web leads via a
 **Key features:**
 - Accepts POST requests at `/lead` (JSON: `{ name, phone, message }`)
 - Uses the lead template and admin notification logic from your config
-- CORS is fully configurable via `config.js` (`ALLOWED_ORIGINS`)
-- Can be launched from your consumer's `bot.js` using `createLeadWebServer`
+ - Can be launched from your consumer's `bot.js` using `createLeadWebServer`
 
 **Example usage:**
 ```js
 const { createLeadWebServer } = require('telegram-comm-agent/web-server');
-const { makeCorsConfig } = require('telegram-comm-agent/cors');
 const config = require('./config');
 const secrets = require('./secrets');
 
 createLeadWebServer({
-   ...secrets,
-   formatLead: ({ name, phone, message }) =>
-      config.STRINGS.LEAD_TEMPLATE(
-         { service: 'web', name, phone, message },
-         { username: 'webform', first_name: 'Web', id: 0 }
-      ),
-   port: process.env.PORT || 3000,
-   botInstance: bot,
-   cors: makeCorsConfig(config.ALLOWED_ORIGINS)
+  ...secrets,
+  formatLead: ({ name, phone, message }) =>
+    config.STRINGS.LEAD_TEMPLATE(
+      { service: 'web', name, phone, message },
+      { username: 'webform', first_name: 'Web', id: 0 }
+    ),
+  port: process.env.PORT || 3000,
+  botInstance: bot
+  // optionally: cors: makeCorsConfig(secrets.CORS_ORIGINS)
 });
 ```
 
 **CORS Configuration:**
-Set allowed origins in your `config.js`:
-```js
-ALLOWED_ORIGINS: [
-   'https://yourdomain.com',
-   // ...
-],
+CORS origins should be provided by the consumer via `secrets.CORS_ORIGINS` (env or secrets file). The library will build the CORS configuration from `secrets.CORS_ORIGINS` if you don't provide an explicit `cors` option.
+
+Example (env):
+```env
+CORS_ORIGINS=https://yourdomain.com,https://other.example
 ```
+
+If you prefer, call the helper yourself:
+```js
+const { makeCorsConfig } = require('telegram-comm-agent/cors');
+createLeadWebServer({ ...secrets, cors: makeCorsConfig(secrets.CORS_ORIGINS) });
+```
+
+Notes:
+- For test environments, pass `port: 0` — the function returns the Express `app` without starting a listener so tests can use `supertest(app)` without leaving open handles.
+- The bot exposes a test-friendly `handleUpdate(update, ctx)` helper: tests can pass a `ctx` object (with `reply` and optional `telegram.sendMessage`) and the library will use it instead of the real networked bot.
 
 ---
 
