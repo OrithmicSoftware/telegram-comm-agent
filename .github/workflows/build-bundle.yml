@@ -7,7 +7,7 @@ on:
     branches: [ main, master ]
 
 permissions:
-  contents: read
+  contents: write
   issues: write
 
 jobs:
@@ -15,6 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Use Node.js 18
         uses: actions/setup-node@v4
         with:
@@ -36,8 +38,13 @@ jobs:
       - name: Verify bundle exists
         run: |
           if [ ! -f dist/bundle.js ]; then echo "dist/bundle.js missing" && ls -la . && exit 1; fi
-      - name: Add build label
-        if: github.event_name == 'pull_request'
-        uses: actions-ecosystem/action-add-labels@v1
-        with:
-          labels: build:success
+      - name: Create build tag
+        if: success()
+        run: |
+          set -e
+          SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
+          TAG=build-success-${SHORT_SHA}
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" -m "Build succeeded for $GITHUB_SHA"
+          git push origin "$TAG"
