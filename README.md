@@ -58,10 +58,10 @@ flowchart TD
    B --> D[telegram-comm-agent Library]
    D --> E[Telegraf Bot]
    D --> F[Process Handlers, Lint, Hooks]
-   B --> G[createLeadWebServer (Web Server)]
-   G --> H[/lead endpoint (Express)]
-   G --> I[CORS Config]
-   G --> J[Lead Template]
+  B --> G["createLeadWebServer (Web Server)"]
+  G --> H["/lead endpoint (Express)"]
+  G --> I["CORS Config"]
+  G --> J["Lead Template"]
 ```
 
 ---
