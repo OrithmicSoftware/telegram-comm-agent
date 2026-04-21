@@ -3,7 +3,7 @@ const path = require('path');
 const JavaScriptObfuscator = require('javascript-obfuscator');
 
 const srcFiles = ['index.js', 'web-server.js', 'cors.js'];
-const outDir = path.join(__dirname, '..', '.build');
+const outDir = path.join(__dirname, '..', 'dist');
 if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
 
 function readSrc(name) {
@@ -65,4 +65,4 @@ const outPath = path.join(outDir, 'bundle.js');
 fs.writeFileSync(outPath, obf, 'utf8');
 console.log('Wrote', outPath);
 
-console.log('Bundle complete. Use require("./.build/bundle.js") to load single-file obfuscated library.');
+console.log('Bundle complete. Use require("./dist/bundle.js") to load single-file obfuscated library.');
