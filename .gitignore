@@ -1,6 +1,5 @@
 ﻿node_modules/
 .DS_Store
 /.build/
-# Keep dist tracked for bundled artifacts
-# dist/
+
 
