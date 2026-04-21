@@ -2,9 +2,9 @@ name: Build Bundle
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, master ]
 
 jobs:
   build-bundle:
@@ -19,6 +19,16 @@ jobs:
         run: npm ci
       - name: Build (bundle)
         run: npm run build --silent -- --mode=bundle
+      - name: Debug: environment
+        run: |
+          node -v
+          npm -v
+          echo "Working dir: $(pwd)"
+          echo "Listing repo root:"
+          ls -la
+      - name: Debug: .build contents
+        run: |
+          if [ -d .build ]; then ls -la .build; else echo ".build dir missing"; fi
       - name: Verify bundle exists
         run: |
-          if [ ! -f .build/bundle.js ]; then echo ".build/bundle.js missing" && exit 1; fi
+          if [ ! -f .build/bundle.js ]; then echo ".build/bundle.js missing" && ls -la . && exit 1; fi
