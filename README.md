@@ -183,3 +183,5 @@ To localize or update UI text, edit `config.js`.
 
 ## License
 MIT
+
+CI: dummy commit to trigger workflow label update
