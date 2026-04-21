@@ -49,7 +49,7 @@ jobs:
           git tag -a "$TAG" -m "Build succeeded for $GITHUB_SHA"
           git push origin "$TAG"
       - name: Add build label (PRs)
-        if: github.event_name == 'pull_request' && success()
+        if: github.event_name == 'pull_request' && success() && github.event.pull_request.head.repo.fork == false
         uses: actions-ecosystem/action-add-labels@v1
         with:
-          labels: build:success
+          labels: "build:success"
