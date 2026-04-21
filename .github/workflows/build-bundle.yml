@@ -21,4 +21,4 @@ jobs:
         run: npm run build --silent -- --mode=bundle
       - name: Verify bundle exists
         run: |
-          if [ ! -f dist/bundle.js ]; then echo "dist/bundle.js missing" && exit 1; fi
+          if [ ! -f .build/bundle.js ]; then echo ".build/bundle.js missing" && exit 1; fi

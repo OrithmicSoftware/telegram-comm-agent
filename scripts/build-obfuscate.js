@@ -3,7 +3,7 @@ const path = require('path');
 const JavaScriptObfuscator = require('javascript-obfuscator');
 
 const srcFiles = ['index.js', 'web-server.js', 'cors.js'];
-const outDir = path.join(__dirname, '..', 'dist');
+const outDir = path.join(__dirname, '..', '.build');
 
 if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
 
@@ -33,6 +33,6 @@ for (const f of srcFiles) {
 // Create a small entry that re-exports the obfuscated index as the module main
 const entry = "module.exports = require('./index.js');\n";
 fs.writeFileSync(path.join(outDir, 'entry.js'), entry, 'utf8');
-console.log('Wrote dist/entry.js');
+console.log('Wrote .build/entry.js');
 
-console.log('Obfuscation complete. Use require("./dist/entry.js") to load obfuscated build.');
+console.log('Obfuscation complete. Use require("./.build/entry.js") to load obfuscated build.');
