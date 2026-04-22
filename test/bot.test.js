@@ -32,6 +32,9 @@ describe('telegram-comm-agent: Bot Integration', () => {
     };
     secrets = { BOT_TOKEN: 'dummy', ADMIN_CHAT_ID: '111', AGENT_CHAT_ID: '222', FORWARD_TO_AGENT: 'no' };
     bot = createCommAgent(config, secrets);
+    // Mock launch and stop to avoid network calls
+    bot.launch = jest.fn();
+    bot.stop = jest.fn();
     replies = [];
     bot.telegram.callApi = jest.fn(() => Promise.resolve(true));
     bot.context.reply = (msg, opts) => replies.push({ msg, opts });
