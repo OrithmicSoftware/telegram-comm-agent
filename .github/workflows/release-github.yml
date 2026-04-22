@@ -29,5 +29,7 @@ jobs:
           files: |
             dist/telegram-comm-agent.min.js
             dist/telegram-comm-agent.tgz
+          draft: false
+          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
