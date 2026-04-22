@@ -1,5 +1,6 @@
 # telegram-comm-agent
 
+[![Release](https://img.shields.io/github/v/release/OrithmicSoftware/telegram-comm-agent?label=release)](https://github.com/OrithmicSoftware/telegram-comm-agent/releases)
 [![Lint](https://github.com/OrithmicSoftware/telegram-comm-agent/actions/workflows/lint.yml/badge.svg)](https://github.com/OrithmicSoftware/telegram-comm-agent/actions/workflows/lint.yml)
 [![Test](https://github.com/OrithmicSoftware/telegram-comm-agent/actions/workflows/test.yml/badge.svg)](https://github.com/OrithmicSoftware/telegram-comm-agent/actions/workflows/test.yml)
 [![Bundle](https://github.com/OrithmicSoftware/telegram-comm-agent/actions/workflows/build-bundle.yml/badge.svg)](https://github.com/OrithmicSoftware/telegram-comm-agent/actions/workflows/build-bundle.yml)
