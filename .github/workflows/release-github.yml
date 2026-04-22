@@ -18,9 +18,13 @@ jobs:
           fetch-depth: 0
       - name: Build (bundle)
         run: npm ci && npm run build --silent -- --mode=bundle
+      - name: Pack npm tarball
+        run: npm pack --pack-destination dist
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/telegram-comm-agent.min.js
+          files: |
+            dist/telegram-comm-agent.min.js
+            dist/telegram-comm-agent-*.tgz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
