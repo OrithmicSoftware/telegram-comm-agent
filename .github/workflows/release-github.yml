@@ -21,11 +21,13 @@ jobs:
         run: npm ci && npm run build --silent -- --mode=bundle
       - name: Pack npm tarball
         run: npm pack --pack-destination dist
+      - name: Rename .tgz to fixed name
+        run: mv dist/telegram-comm-agent-*.tgz dist/telegram-comm-agent.tgz
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v2
         with:
           files: |
             dist/telegram-comm-agent.min.js
-            dist/telegram-comm-agent-*.tgz
+            dist/telegram-comm-agent.tgz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
