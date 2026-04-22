@@ -12,12 +12,33 @@ A reusable, configurable Telegram communication agent bot template for Node.js, 
 ## Usage Example
 See the main README.md for usage and configuration examples.
 
+
 ## API
 ### createCommAgent(TelegrafClass, config, secrets)
 - `TelegrafClass`: The Telegraf class to instantiate (must be provided by the consumer; see peerDependencies)
 - `config`: Object with STRINGS, SERVICES, BUTTONS, etc.
 - `secrets`: Object with BOT_TOKEN, ADMIN_CHAT_ID, AGENT_CHAT_ID, FORWARD_TO_AGENT, etc.
 - Returns: Configured Telegraf bot instance
+
+### handleLeadForwarding(bot, config, leadText, options)
+Handles forwarding a lead according to your config's FORWARD_TO_AGENT setting.
+
+- `bot`: Telegraf bot instance
+- `config`: Bot config (must include ADMIN_CHAT_ID, AGENT_CHAT_ID, FORWARD_TO_AGENT, STRINGS)
+- `leadText`: The formatted lead text (string)
+- `options`: Optional context for callback (e.g. `{ ctx }` for Telegram, `{ res }` for web)
+- Returns: Promise resolving to 'all', 'admin', or 'ask' (how the lead was forwarded)
+
+**Behavior:**
+- If `FORWARD_TO_AGENT` is `'all'`, sends the lead to both admin and agent.
+- If `'no'`, sends only to admin.
+- If `'ask'`, sends to admin with inline buttons to approve/forward to agent.
+
+**Example:**
+```js
+const { handleLeadForwarding } = require('telegram-comm-agent');
+await handleLeadForwarding(bot, config, leadText, { ctx });
+```
 
 ## Configuration Reference
 - See config.example.js in consumer projects for structure.

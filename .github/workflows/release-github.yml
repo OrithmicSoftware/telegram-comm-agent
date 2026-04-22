@@ -17,23 +17,3 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Build (bundle)
-        run: npm ci && npm run build --silent -- --mode=bundle
-      - name: Prepare minified-only npm package
-        run: |
-          cp dist/telegram-comm-agent.min.js dist/index.js
-          cp dist/package.json dist/
-      - name: Pack npm tarball (minified only)
-        run: |
-          cd dist && npm pack --pack-destination .
-          mv dist/telegram-comm-agent-*.tgz dist/telegram-comm-agent.tgz
-      - name: Upload Release Asset
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            dist/telegram-comm-agent.min.js
-            dist/telegram-comm-agent.tgz
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

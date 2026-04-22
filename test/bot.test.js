@@ -59,13 +59,31 @@ describe('telegram-comm-agent: Bot Integration', () => {
     replies = [];
   });
 
-  it('should launch and stop the bot without error', async () => {
-    const validSecrets = { BOT_TOKEN: 'dummy', ADMIN_CHAT_ID: '111', AGENT_CHAT_ID: '222', FORWARD_TO_AGENT: 'no' };
-    const validBot = createCommAgent(TelegrafMock, config, validSecrets);
-    validBot.launch = jest.fn();
-    validBot.stop = jest.fn();
-    expect(() => validBot.launch()).not.toThrow();
-    expect(() => validBot.stop('SIGINT')).not.toThrow();
+
+  it('should forward lead to both admin and agent when FORWARD_TO_AGENT is "all"', async () => {
+    const secretsAll = { BOT_TOKEN: 'dummy', ADMIN_CHAT_ID: '111', AGENT_CHAT_ID: '222', FORWARD_TO_AGENT: 'all' };
+    const botAll = createCommAgent(TelegrafMock, config, secretsAll);
+    botAll.telegram.sendMessage = jest.fn(() => Promise.resolve(true));
+    const user = { id: userId, username: 'testuser', first_name: 'Test' };
+    // Simulate a completed flow (lead)
+    const collected = { service: Object.keys(config.SERVICES)[0], name: 'answer0', phone: 'answer1' };
+    const leadMsg = config.STRINGS.LEAD_TEMPLATE(collected, user);
+    await botAll.telegram.sendMessage('111', leadMsg);
+    await botAll.telegram.sendMessage('222', leadMsg);
+    expect(botAll.telegram.sendMessage).toHaveBeenCalledWith('111', expect.stringContaining('Lead'));
+    expect(botAll.telegram.sendMessage).toHaveBeenCalledWith('222', expect.stringContaining('Lead'));
+  });
+
+  it('should forward fallback message to both admin and agent when FORWARD_TO_AGENT is "all"', async () => {
+    const secretsAll = { BOT_TOKEN: 'dummy', ADMIN_CHAT_ID: '111', AGENT_CHAT_ID: '222', FORWARD_TO_AGENT: 'all' };
+    const botAll = createCommAgent(TelegrafMock, config, secretsAll);
+    botAll.telegram.sendMessage = jest.fn(() => Promise.resolve(true));
+    const user = { id: userId, username: 'testuser', first_name: 'Test' };
+    const msg = config.STRINGS.MSG_TEMPLATE(user, 'random message');
+    await botAll.telegram.sendMessage('111', msg);
+    await botAll.telegram.sendMessage('222', msg);
+    expect(botAll.telegram.sendMessage).toHaveBeenCalledWith('111', expect.stringContaining('Message'));
+    expect(botAll.telegram.sendMessage).toHaveBeenCalledWith('222', expect.stringContaining('Message'));
   });
 
   it('should handle missing secrets', () => {
