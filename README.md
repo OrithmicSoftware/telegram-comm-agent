@@ -1,4 +1,3 @@
-
 # telegram-comm-agent
 
 [![Lint](https://github.com/OrithmicSoftware/telegram-comm-agent/actions/workflows/lint.yml/badge.svg)](https://github.com/OrithmicSoftware/telegram-comm-agent/actions/workflows/lint.yml)
@@ -185,3 +184,32 @@ To localize or update UI text, edit `config.js`.
 MIT
 
 CI: dummy commit to trigger workflow label update
+
+// ---
+// Obfuscation
+
+The production bundle is obfuscated using [javascript-obfuscator](https://github.com/javascript-obfuscator/javascript-obfuscator) with the following settings, which have been verified to pass all E2E tests:
+
+```
+{
+  compact: true,
+  controlFlowFlattening: true,
+  deadCodeInjection: true,
+  stringArray: true,
+  stringArrayEncoding: ['rc4'],
+  stringArrayThreshold: 1,
+  selfDefending: true,
+  disableConsoleOutput: true
+}
+```
+
+- To rebuild and obfuscate:
+  ```sh
+  node scripts/build.js && node scripts/obfuscate.js
+  ```
+- To run the E2E test against the obfuscated bundle:
+  ```sh
+  node ./test/e2e.test.js
+  ```
+
+All features above are enabled for maximum security without breaking testability. If you add new features, always re-run the E2E test to verify compatibility.
