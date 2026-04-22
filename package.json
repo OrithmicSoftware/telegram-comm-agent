@@ -21,8 +21,7 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint .",
-    "test": "jest --runInBand && node ./test/e2e.test.js",
-    "e2e:node:plain": "node ./test/e2e.test.js",
+    "test": "jest --runInBand",
     "build": "node scripts/build.js"
   },
   "dependencies": {
