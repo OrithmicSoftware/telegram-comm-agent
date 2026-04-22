@@ -3,7 +3,6 @@ const { createLeadWebServer } = require('../web-server');
 const request = require('supertest');
 
 describe('telegram-comm-agent: Bot Integration', () => {
-  let bot;
   let config;
   let secrets;
   let replies;
@@ -55,7 +54,7 @@ describe('telegram-comm-agent: Bot Integration', () => {
         handleUpdate: jest.fn(),
       };
     }
-    bot = createCommAgent(TelegrafMock, config, secrets);
+    createCommAgent(TelegrafMock, config, secrets);
     // Mock launch and stop to avoid network calls
     replies = [];
   });
