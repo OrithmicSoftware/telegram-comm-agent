@@ -1,4 +1,3 @@
-
 # telegram-comm-agent
 
 [![Lint](https://github.com/OrithmicSoftware/telegram-comm-agent/actions/workflows/lint.yml/badge.svg)](https://github.com/OrithmicSoftware/telegram-comm-agent/actions/workflows/lint.yml)
@@ -178,6 +177,29 @@ To localize or update UI text, edit `config.js`.
 ## Testing
 
 - Run `npm test` to execute the test suite.
+
+---
+
+## Releasing & Installing from npm
+
+To publish a new release:
+1. Bump the version in `package.json` (e.g., `1.0.0`).
+2. Commit and push your changes.
+3. Tag the release:
+   ```sh
+   git tag v1.0.0
+   git push origin v1.0.0
+   ```
+4. GitHub Actions will build and publish to npm automatically if you have `NPM_TOKEN` set in repo secrets.
+
+To install the latest release in your project:
+```sh
+npm install telegram-comm-agent@latest telegraf
+```
+Or to install a specific version:
+```sh
+npm install telegram-comm-agent@1.0.0 telegraf
+```
 
 ---
 
