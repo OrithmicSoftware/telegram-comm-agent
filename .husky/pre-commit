@@ -1,0 +1,5 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+# Run lint and tests but do not block commits if they fail (avoid interactive prompts)
+npm run lint --silent
+npm test --silent
