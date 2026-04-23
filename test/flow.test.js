@@ -37,17 +37,17 @@ describe('telegram-comm-agent: Step Flow', () => {
       BUTTONS: { SERVICE_LIST: 'List Services', CONTACT: 'Contact' },
     };
     secrets = { BOT_TOKEN: 'dummy', ADMIN_CHAT_ID: '111', AGENT_CHAT_ID: '222', FORWARD_TO_AGENT: 'no' };
-    bot = createCommAgent(config, secrets);
     replies = [];
+    bot = createCommAgent(config, secrets);
     // Mock sendMessage for all tests
     bot.telegram.sendMessage = jest.fn(() => Promise.resolve(true));
-    bot.context = { reply: (msg, opts) => replies.push({ msg, opts }) };
+    bot.context = { reply: (msg) => replies.push({ msg }) };
   });
 
   it('should create a bot and walk through the FLOW prompts', async () => {
     const flow = config.STRINGS.FLOW;
     const user = { id: userId, username: 'testuser', first_name: 'Test' };
-    bot.context = { from: user, message: { text: Object.values(config.SERVICES)[0] }, reply: (msg, opts) => replies.push({ msg, opts }) };
+    bot.context = { from: user, message: { text: Object.values(config.SERVICES)[0] }, reply: (msg) => replies.push({ msg }) };
     for (let i = 0; i < flow.length; i++) {
       bot.context.from = user;
       bot.context.message = { text: `answer${i}` };
@@ -69,23 +69,20 @@ describe('telegram-comm-agent: Step Flow', () => {
     const ctxService = { from: user, message: { text: serviceText }, reply: jest.fn() };
     await bot.handleUpdate({ message: { text: serviceText, from: user } }, ctxService);
     // Simulate user answering each step in the flow
-    let lastCtx = ctxService;
-    for (const step of config.STRINGS.FLOW) {
+    for (let i = 0; i < config.STRINGS.FLOW.length; i++) {
       const stepCtx = { from: user, message: { text: 'answer' }, reply: jest.fn() };
       await bot.handleUpdate({ message: { text: 'answer', from: user } }, stepCtx);
-      lastCtx = stepCtx;
     }
     // After last answer, lead should be sent
     expect(bot.telegram.sendMessage).toHaveBeenCalledWith('111', expect.stringContaining('Lead'));
     expect(bot.telegram.sendMessage).toHaveBeenCalledWith('222', expect.stringContaining('Lead'));
   });
 
-  it('should forward fallback message to both admin and agent when FORWARD_TO_AGENT is "all"', async () => {
+  it('should send fallback messages to both admin and agent when FORWARD_TO_AGENT is "all"', async () => {
     bot.telegram.sendMessage = jest.fn(() => Promise.resolve(true));
     secrets.FORWARD_TO_AGENT = 'all';
     const user = { id: userId, username: 'testuser', first_name: 'Test' };
-    // Simulate a fallback message (not in flow)
-    bot.context = { from: user, message: { text: 'random message' }, reply: (msg, opts) => {} };
+    bot.context = { from: user, message: { text: 'random message' }, reply: (_msg) => {} };
     // Directly call processMessage to simulate fallback
     await bot.telegram.sendMessage('111', config.STRINGS.MSG_TEMPLATE(user, 'random message'));
     await bot.telegram.sendMessage('222', config.STRINGS.MSG_TEMPLATE(user, 'random message'));

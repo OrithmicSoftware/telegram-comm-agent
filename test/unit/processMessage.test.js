@@ -11,8 +11,8 @@ describe('makeProcessMessage', () => {
 			STRINGS: {
 				INVALID_SERVICE: 'Invalid',
 				CHOOSE_SERVICE: 'Choose',
-				LEAD_TEMPLATE: (collected, user) => `Lead: ${collected.service}, ${collected.name}`,
-				MSG_TEMPLATE: (user, text) => `Msg: ${text}`,
+				LEAD_TEMPLATE: (collected) => `Lead: ${collected.service}, ${collected.name}`,
+				MSG_TEMPLATE: (_user, text) => `Msg: ${text}`,
 				LEAD_SENT: 'Lead sent',
 				MSG_SENT: 'Msg sent',
 				APPROVE_BTN: 'Approve',

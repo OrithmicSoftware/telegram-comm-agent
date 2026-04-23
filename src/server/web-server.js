@@ -21,7 +21,7 @@ const { makeCorsConfig } = require('../utils/cors');
  */
 
 
-function createLeadWebServer({ BOT_TOKEN, ADMIN_CHAT_ID, AGENT_CHAT_ID, formatLead, port = 3000, botInstance, cors: corsOptions, TelegrafClass }) {
+function createLeadWebServer({ BOT_TOKEN, ADMIN_CHAT_ID, AGENT_CHAT_ID, formatLead, port = 3000, botInstance, cors: corsOptions }) {
   if (!BOT_TOKEN || !ADMIN_CHAT_ID || !AGENT_CHAT_ID) {
     throw new Error('Missing BOT_TOKEN, ADMIN_CHAT_ID, or AGENT_CHAT_ID');
   }

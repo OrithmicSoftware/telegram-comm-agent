@@ -1,10 +1,10 @@
 describe('E2E: Telegram chat flow', () => {
-	let sentMessages, replied, userStates, config, secrets, mainMenu, serviceMenu, bot, processMessage, callbackResults;
+	let sentMessages, replied, userStates, config, secrets, mainMenu, serviceMenu, bot, processMessage;
 
 	beforeEach(() => {
 		sentMessages = [];
 		replied = [];
-		callbackResults = [];
+		// callbackResults removed (unused)
 		userStates = {};
 		config = {
 			BUTTONS: { SERVICE_LIST: 'List', CONTACT: 'Contact' },
@@ -14,8 +14,8 @@ describe('E2E: Telegram chat flow', () => {
 			STRINGS: {
 				INVALID_SERVICE: 'Invalid',
 				CHOOSE_SERVICE: 'Choose',
-				LEAD_TEMPLATE: (collected, user) => `Lead: ${collected.service}, ${collected.name}`,
-				MSG_TEMPLATE: (user, text) => `Msg: ${text}`,
+				LEAD_TEMPLATE: (collected) => `Lead: ${collected.service}, ${collected.name}`,
+				MSG_TEMPLATE: (_user, text) => `Msg: ${text}`,
 				LEAD_SENT: 'Lead sent',
 				MSG_SENT: 'Msg sent',
 				APPROVE_BTN: 'Approve',
@@ -59,7 +59,7 @@ describe('E2E: Telegram chat flow', () => {
 
 
 const supertest = require('supertest');
-const express = require('express');
+// const express = require('express'); // unused
 const { createLeadWebServer } = require('../../src/server/web-server');
 
 describe('E2E: /lead endpoint', () => {
