@@ -12,4 +12,12 @@ async function forwardMessage(bot, config, secrets, text, opts = {}) {
   }
 }
 
-module.exports = { forwardMessage };
+async function forwardToAdmin(bot, adminId, text, opts = {}) {
+  await bot.telegram.sendMessage(adminId, text, opts);
+}
+
+async function forwardToAgent(bot, agentId, text, opts = {}) {
+  await bot.telegram.sendMessage(agentId, text, opts);
+}
+
+module.exports = { forwardMessage, forwardToAdmin, forwardToAgent };

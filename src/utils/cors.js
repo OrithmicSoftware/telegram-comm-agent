@@ -1,6 +1,4 @@
-// CORS config helper for telegram-comm-agent
-// Accepts origins from config, not from env
-
+// Moved from root to src/utils/cors.js
 /**
  * @param {string[]|string|false} origins - Allowed origins (array, string, or false to disable)
  * @returns {object} CORS config for Express

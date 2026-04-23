@@ -1,17 +1,19 @@
 
+
+const { Telegraf } = require('telegraf');
 const { buildMainMenu, buildServiceMenu } = require('./src/menus');
 const { handleCallbackQuery } = require('./src/callbackHandlers');
 const { makeProcessMessage } = require('./src/processMessage');
 const handleLeadForwarding = require('./src/handleLeadForwarding');
 
-function createCommAgent(TelegrafClass, config, secrets) {
+function createCommAgent(config, secrets) {
   if (typeof console !== 'undefined' && console.log) console.log('[comm-agent] createCommAgent called');
   if (!secrets.BOT_TOKEN || !secrets.ADMIN_CHAT_ID || !secrets.AGENT_CHAT_ID) {
     if (typeof console !== 'undefined' && console.error) console.error('[comm-agent] Missing required secrets:', secrets);
     throw new Error('Missing BOT_TOKEN, ADMIN_CHAT_ID, or AGENT_CHAT_ID');
   }
   if (typeof console !== 'undefined' && console.log) console.log('[comm-agent] Initializing Telegraf bot');
-  const bot = new TelegrafClass(secrets.BOT_TOKEN);
+  const bot = new Telegraf(secrets.BOT_TOKEN);
   const userStates = {};
   const mainMenu = buildMainMenu(config);
   const serviceMenu = buildServiceMenu(config);

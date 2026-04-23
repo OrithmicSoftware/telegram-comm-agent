@@ -1,6 +1,8 @@
+// Moved from root to src/server/web-server.js
+const Telegraf = require('telegraf').Telegraf;
 const express = require('express');
 const cors = require('cors');
-const { makeCorsConfig } = require('./cors');
+const { makeCorsConfig } = require('../utils/cors');
 
 /**
  * Create and start a web server to receive leads and forward to Telegram.
@@ -17,18 +19,16 @@ const { makeCorsConfig } = require('./cors');
  * @param {Object} options
  * @param {Object} [options.cors] - Optional CORS config (see cors npm package)
  */
-function createLeadWebServer({ BOT_TOKEN, ADMIN_CHAT_ID, AGENT_CHAT_ID, formatLead, port = 3000, botInstance, cors: corsOptions }) {
+
+
+function createLeadWebServer({ BOT_TOKEN, ADMIN_CHAT_ID, AGENT_CHAT_ID, formatLead, port = 3000, botInstance, cors: corsOptions, TelegrafClass }) {
   if (!BOT_TOKEN || !ADMIN_CHAT_ID || !AGENT_CHAT_ID) {
     throw new Error('Missing BOT_TOKEN, ADMIN_CHAT_ID, or AGENT_CHAT_ID');
   }
 
-  const { Telegraf } = require('telegraf');
   const bot = botInstance || new Telegraf(BOT_TOKEN);
   const app = express();
   app.use(express.json());
-  // If consumer did not pass a `cors` config but provided `CORS_ORIGINS` (via secrets),
-  // build the cors config internally from that value. This allows consumers to
-  // simply set `CORS_ORIGINS` in their `secrets` without calling `makeCorsConfig()`.
   if (!corsOptions && typeof arguments[0] === 'object' && arguments[0].CORS_ORIGINS) {
     corsOptions = makeCorsConfig(arguments[0].CORS_ORIGINS);
   }
@@ -36,7 +36,7 @@ function createLeadWebServer({ BOT_TOKEN, ADMIN_CHAT_ID, AGENT_CHAT_ID, formatLe
   if (corsOptions) {
     app.use(cors(corsOptions));
   } else {
-    app.use(cors()); // allow all by default
+    app.use(cors());
   }
 
   app.post('/lead', async (req, res) => {
@@ -62,8 +62,6 @@ function createLeadWebServer({ BOT_TOKEN, ADMIN_CHAT_ID, AGENT_CHAT_ID, formatLe
     return server;
   }
 
-  // When port is 0 (tests), don't start listening to avoid open handles;
-  // return the express app so tests can use supertest(app) without starting a server.
   console.log('Web server created (not listening) for test app');
   return app;
 }

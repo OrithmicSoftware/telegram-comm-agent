@@ -1,3 +1,4 @@
+
 # telegram-comm-agent Documentation
 
 ## Overview
@@ -12,14 +13,7 @@ A reusable, configurable Telegram communication agent bot template for Node.js, 
 ## Usage Example
 See the main README.md for usage and configuration examples.
 
-
 ## API
-### createCommAgent(TelegrafClass, config, secrets)
-- `TelegrafClass`: The Telegraf class to instantiate (must be provided by the consumer; see peerDependencies)
-- `config`: Object with STRINGS, SERVICES, BUTTONS, etc.
-- `secrets`: Object with BOT_TOKEN, ADMIN_CHAT_ID, AGENT_CHAT_ID, FORWARD_TO_AGENT, etc.
-- Returns: Configured Telegraf bot instance
-
 ### handleLeadForwarding(bot, config, leadText, options)
 Handles forwarding a lead according to your config's FORWARD_TO_AGENT setting.
 
@@ -45,16 +39,13 @@ await handleLeadForwarding(bot, config, leadText, { ctx });
 - All prompts, flow, and menu labels are customizable.
 
 ## Peer Dependencies
-- You must install `telegraf` (version >=4.0.0) in your project and inject it as the first argument to `createCommAgent`.
-	Example:
-	```js
-	const { Telegraf } = require('telegraf');
-	const { createCommAgent } = require('telegram-comm-agent');
-	const bot = createCommAgent(Telegraf, config, secrets);
-	```
+- You must install `telegraf` (version >=4.0.0) in your project.
+- The library now requires Telegraf directly (no DI). For tests, use `proxyquire` to mock Telegraf.
 
 ## Testing
-- Run `npm test` to execute the test suite.
+- Run `npm test` to execute the test suite (unit and e2e).
+- E2E tests cover Telegram and web flows using a mock Telegram API server.
+- Use `proxyquire` for mocking Telegraf in tests.
 
 ## License
 MIT
