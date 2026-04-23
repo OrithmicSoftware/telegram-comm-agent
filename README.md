@@ -1,11 +1,12 @@
 # telegram-comm-agent
 
-[![Release](https://img.shields.io/github/v/release/OrithmicSoftware/telegram-comm-agent?label=release)](https://github.com/OrithmicSoftware/telegram-comm-agent/releases)
-[![Lint](https://github.com/OrithmicSoftware/telegram-comm-agent/actions/workflows/lint.yml/badge.svg)](https://github.com/OrithmicSoftware/telegram-comm-agent/actions/workflows/lint.yml)
-[![Test](https://github.com/OrithmicSoftware/telegram-comm-agent/actions/workflows/test.yml/badge.svg)](https://github.com/OrithmicSoftware/telegram-comm-agent/actions/workflows/test.yml)
+
 
 ## Overview
+
 A reusable, configurable Telegram communication agent bot template for Node.js, based on Telegraf. Import as a library and provide your own config and secrets.
+
+**No bundle/minified build is provided. Install via GitHub or copy the source.**
 
 ## Features
 - Data-driven, step-by-step flow
@@ -14,6 +15,7 @@ A reusable, configurable Telegram communication agent bot template for Node.js, 
 - Easy to integrate in any Node.js project
 
 ## Usage Example
+
 See the main docs/README.md for usage and configuration examples.
 
 ## API
@@ -31,46 +33,43 @@ Handles forwarding a lead according to your config's FORWARD_TO_AGENT setting.
 - If `'no'`, sends only to admin.
 - If `'ask'`, sends to admin with inline buttons to approve/forward to agent.
 
+
 **Example:**
 ```js
-const { handleLeadForwarding } = require('telegram-comm-agent');
-await handleLeadForwarding(bot, config, leadText, { ctx });
+const { createCommAgent, handleLeadForwarding } = require('telegram-comm-agent');
+const config = require('./config');
+const secrets = require('./secrets');
+const bot = createCommAgent(config, secrets);
+// ...
 ```
 
 ## Web Server & /lead Endpoint
+
 See `src/server/web-server.js` for a ready-to-use Express server for web leads.
 
 ## Configuration Reference
+
 - See config.example.js in consumer projects for structure.
 - All prompts, flow, and menu labels are customizable.
 
 ## Peer Dependencies
+
 - You must install `telegraf` (version >=4.0.0) in your project.
-- The library now requires Telegraf directly (no DI). For tests, use `proxyquire` to mock Telegraf.
+- The library now requires Telegraf directly (no DI). For tests, use instance-level mocking.
 
 ## Testing
+
 - Run `npm test` to execute the test suite (unit and e2e).
-- E2E tests cover Telegram and web flows using a mock Telegram API server.
-- Use `proxyquire` for mocking Telegraf in tests.
+- E2E tests cover Telegram and web flows using instance-level mocking.
 
 ## Releasing & Installing from GitHub Releases
-To use a specific release, download the `telegram-comm-agent.min.js` bundle from the [GitHub Releases page](https://github.com/OrithmicSoftware/telegram-comm-agent/releases).
 
-**Example (in your project):**
-1. Download the latest `telegram-comm-agent.min.js` from the [releases](https://github.com/OrithmicSoftware/telegram-comm-agent/releases).
-2. Place it in your project (e.g., `vendor/telegram-comm-agent.min.js`).
-3. Require it in your code:
-   ```js
-   const { createCommAgent } = require('./vendor/telegram-comm-agent.min.js');
-   // ...
-   ```
-
-You can also use GitHub tarball/zip URLs in npm if you want to install the full repo:
+**Install:**
 ```sh
-npm install OrithmicSoftware/telegram-comm-agent#v1.0.0
+npm install OrithmicSoftware/telegram-comm-agent#main
 ```
 
-> **Note:** This package is not published to npm. Always use the GitHub Releases asset above.
+> **Note:** This package is not published to npm. Install directly from GitHub.
 
 ## License
 MIT

@@ -23,8 +23,6 @@ jobs:
           node-version: '20'
       - name: Install
         run: npm ci
-      - name: Build (bundle)
-        run: npm run build --silent -- --mode=bundle
       - name: "Debug: environment"
         run: |
           node -v
@@ -32,24 +30,3 @@ jobs:
           echo "Working dir: $(pwd)"
           echo "Listing repo root:"
           ls -la
-      - name: "Debug: dist contents"
-        run: |
-          if [ -d dist ]; then ls -la dist; else echo "dist dir missing"; fi
-      - name: Verify bundle exists
-        run: |
-          if [ ! -f dist/telegram-comm-agent.min.js ]; then echo "dist/telegram-comm-agent.min.js missing" && ls -la dist && exit 1; fi
-      - name: Create build tag
-        if: success()
-        run: |
-          set -e
-          SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
-          TAG=build-success-${SHORT_SHA}
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -a "$TAG" -m "Build succeeded for $GITHUB_SHA"
-          git push origin "$TAG"
-      - name: Add build label (PRs)
-        if: github.event_name == 'pull_request' && success() && github.event.pull_request.head.repo.fork == false
-        uses: actions-ecosystem/action-add-labels@v1
-        with:
-          labels: "Bundle"
