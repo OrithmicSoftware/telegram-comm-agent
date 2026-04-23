@@ -1,69 +1,117 @@
+
 # telegram-comm-agent
 
-
+[![Release](https://img.shields.io/github/v/release/OrithmicSoftware/telegram-comm-agent?label=release)](https://github.com/OrithmicSoftware/telegram-comm-agent/releases)
+[![Lint](https://github.com/OrithmicSoftware/telegram-comm-agent/actions/workflows/lint.yml/badge.svg)](https://github.com/OrithmicSoftware/telegram-comm-agent/actions/workflows/lint.yml)
+[![Test](https://github.com/OrithmicSoftware/telegram-comm-agent/actions/workflows/test.yml/badge.svg)](https://github.com/OrithmicSoftware/telegram-comm-agent/actions/workflows/test.yml)
 
 ## Overview
 
-A reusable, configurable Telegram communication agent bot template for Node.js, based on Telegraf. Import as a library and provide your own config and secrets.
+**telegram-comm-agent** is a reusable, highly-configurable Telegram communication agent bot template for Node.js, built on [Telegraf](https://telegraf.js.org/). It enables you to create powerful, data-driven bots for lead capture, service flows, and chat-based automation—without hardcoding business logic or secrets.
 
-**No bundle/minified build is provided. Install via GitHub or copy the source.**
+---
 
 ## Features
-- Data-driven, step-by-step flow
-- All prompts, services, and logic are configurable
-- No secrets or business logic hardcoded
-- Easy to integrate in any Node.js project
 
-## Usage Example
+- **Data-driven step-by-step flows**: Define your own service flows, prompts, and menus in config.
+- **No hardcoded secrets or business logic**: All sensitive data and flow logic are externalized.
+- **Admin/agent lead routing**: Flexible forwarding modes (`all`, `no`, `ask`) for leads and messages.
+- **Web server integration**: Built-in Express server for `/lead` HTTP endpoint.
+- **Extensible and testable**: Clean modular code, full unit and e2e test coverage, easy to mock.
 
-See the main docs/README.md for usage and configuration examples.
+---
 
-## API
-### handleLeadForwarding(bot, config, leadText, options)
-Handles forwarding a lead according to your config's FORWARD_TO_AGENT setting.
+## Installation
 
-- `bot`: Telegraf bot instance
-- `config`: Bot config (must include ADMIN_CHAT_ID, AGENT_CHAT_ID, FORWARD_TO_AGENT, STRINGS)
-- `leadText`: The formatted lead text (string)
-- `options`: Optional context for callback (e.g. `{ ctx }` for Telegram, `{ res }` for web)
-- Returns: Promise resolving to 'all', 'admin', or 'ask' (how the lead was forwarded)
+Install the package directly from GitHub Releases or source:
 
-**Behavior:**
-- If `FORWARD_TO_AGENT` is `'all'`, sends the lead to both admin and agent.
-- If `'no'`, sends only to admin.
-- If `'ask'`, sends to admin with inline buttons to approve/forward to agent.
-
-
-**Example:**
-```js
-const { createCommAgent, handleLeadForwarding } = require('telegram-comm-agent');
-const config = require('./config');
-const secrets = require('./secrets');
-const bot = createCommAgent(config, secrets);
-// ...
+```sh
+npm install OrithmicSoftware/telegram-comm-agent#main
 ```
 
-## Web Server & /lead Endpoint
+> **Note:** This package is not published to npm. Use the GitHub repo or releases.
 
-See `src/server/web-server.js` for a ready-to-use Express server for web leads.
+---
 
-## Configuration Reference
+## Quick Start
 
-- See config.example.js in consumer projects for structure.
-- All prompts, flow, and menu labels are customizable.
+1. **Install [telegraf](https://www.npmjs.com/package/telegraf)** in your project:
+	```sh
+	npm install telegraf
+	```
+2. **Copy and edit `config.example.js` and `secrets.example.js`** to define your services, prompts, and credentials.
+3. **Create and launch your bot:**
+	```js
+	const { createCommAgent } = require('telegram-comm-agent');
+	const config = require('./config');
+	const secrets = require('./secrets');
+	const bot = createCommAgent(config, secrets);
+	bot.launch();
+	```
 
-## Peer Dependencies
+---
 
-- You must install `telegraf` (version >=4.0.0) in your project.
-- The library now requires Telegraf directly (no DI). For tests, use instance-level mocking.
+## Configuration
+
+All bot behavior is controlled by your config and secrets files. See [`config.example.js`](config.example.js) for a full template.
+
+- **SERVICES**: List of services (e.g. pizza, car rental, etc.)
+- **STRINGS**: All prompts, menu labels, and templates
+- **BUTTONS**: Main menu and service menu button labels
+- **FLOW**: Step-by-step fields and prompts for each service
+- **FORWARD_TO_AGENT**: `'all'`, `'no'`, or `'ask'` (lead routing mode)
+
+---
+
+## API
+
+### `createCommAgent(config, secrets)`
+Creates and returns a Telegraf bot instance, fully wired with your config and flows.
+
+### `handleLeadForwarding(bot, config, leadText, options)`
+Forwards a lead to admin/agent according to your config. See [docs/README.md](docs/README.md) for details.
+
+### Web Server: `/lead` endpoint
+Use `require('telegram-comm-agent/web-server')` to get an Express app that accepts POSTed leads and forwards them to Telegram.
+
+---
 
 ## Testing
 
-- Run `npm test` to execute the test suite (unit and e2e).
-- E2E tests cover Telegram and web flows using instance-level mocking.
+- Run `npm test` for full unit and e2e coverage.
+- E2E tests simulate Telegram and web flows with instance-level mocking.
 
-## Releasing & Installing from GitHub Releases
+---
 
+## Documentation
+
+See [docs/README.md](docs/README.md) for advanced usage, configuration reference, and extension patterns.
+
+---
+
+---
+
+## GitHub Labels
+
+This repository uses the following labels to organize issues and pull requests:
+
+| Label              | Color    | Description                              |
+|--------------------|----------|------------------------------------------|
+| `bug`              | d73a4a   | Something isn't working                  |
+| `documentation`    | 0075ca   | Improvements or additions to documentation |
+| `duplicate`        | cfd3d7   | This issue or pull request already exists |
+| `enhancement`      | a2eeef   | New feature or request                   |
+| `good first issue` | 7057ff   | Good for newcomers                       |
+| `help wanted`      | 008672   | Extra attention is needed                |
+| `invalid`          | e4e669   | This doesn't seem right                  |
+| `question`         | d876e3   | Further information is requested         |
+| `wontfix`          | ffffff   | This will not be worked on               |
+
+---
+
+## License
+
+MIT
 **Install:**
 ```sh
 npm install OrithmicSoftware/telegram-comm-agent#main

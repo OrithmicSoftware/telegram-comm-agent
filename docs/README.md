@@ -1,51 +1,94 @@
 
-# telegram-comm-agent Documentation
 
-## Overview
-A reusable, configurable Telegram communication agent bot template for Node.js, based on Telegraf. Import as a library and provide your own config and secrets.
+# telegram-comm-agent: User & Developer Guide
 
-## Features
-- Data-driven, step-by-step flow
-- All prompts, services, and logic are configurable
-- No secrets or business logic hardcoded
-- Easy to integrate in any Node.js project
+## 1. Introduction
 
-## Usage Example
-See the main README.md for usage and configuration examples.
+**telegram-comm-agent** is a modular, highly-configurable Telegram bot framework for Node.js, designed for lead capture, service flows, and chat automation. It is built on [Telegraf](https://telegraf.js.org/) and is intended for integration as a library in your own projects.
 
-## API
-### handleLeadForwarding(bot, config, leadText, options)
-Handles forwarding a lead according to your config's FORWARD_TO_AGENT setting.
+---
 
-- `bot`: Telegraf bot instance
-- `config`: Bot config (must include ADMIN_CHAT_ID, AGENT_CHAT_ID, FORWARD_TO_AGENT, STRINGS)
-- `leadText`: The formatted lead text (string)
-- `options`: Optional context for callback (e.g. `{ ctx }` for Telegram, `{ res }` for web)
-- Returns: Promise resolving to 'all', 'admin', or 'ask' (how the lead was forwarded)
+## 2. Architecture & Concepts
 
-**Behavior:**
-- If `FORWARD_TO_AGENT` is `'all'`, sends the lead to both admin and agent.
-- If `'no'`, sends only to admin.
-- If `'ask'`, sends to admin with inline buttons to approve/forward to agent.
+- **Config-driven**: All flows, prompts, and services are defined in config files—no business logic in code.
+- **Separation of concerns**: Core logic, menus, callbacks, and forwarding are modularized for easy extension and testing.
+- **Lead routing**: Flexible admin/agent routing with modes: `all`, `no`, `ask`.
+- **Web integration**: Optional Express server for HTTP `/lead` endpoint.
 
-**Example:**
+---
+
+## 3. Configuration Reference
+
+See [`config.example.js`](../config.example.js) for a full template. Key fields:
+
+- `BOT_TOKEN`, `ADMIN_CHAT_ID`, `AGENT_CHAT_ID`: Credentials and routing.
+- `FORWARD_TO_AGENT`: `'all'`, `'no'`, or `'ask'` (lead routing mode).
+- `SERVICES`: Service keys and labels.
+- `STRINGS`: All prompts, templates, and button labels.
+- `BUTTONS`: Main and service menu buttons.
+- `FLOW`: Array of step objects `{ field, prompt }` for each service.
+
+---
+
+## 4. Usage Patterns
+
+### Basic Bot
+```js
+const { createCommAgent } = require('telegram-comm-agent');
+const config = require('./config');
+const secrets = require('./secrets');
+const bot = createCommAgent(config, secrets);
+bot.launch();
+```
+
+### Web Server for /lead
+```js
+const { createLeadWebServer } = require('telegram-comm-agent/web-server');
+const app = createLeadWebServer({
+	BOT_TOKEN: '...',
+	ADMIN_CHAT_ID: '...',
+	AGENT_CHAT_ID: '...'
+});
+app.listen(3000);
+```
+
+### Custom Lead Forwarding
 ```js
 const { handleLeadForwarding } = require('telegram-comm-agent');
 await handleLeadForwarding(bot, config, leadText, { ctx });
 ```
 
-## Configuration Reference
-- See config.example.js in consumer projects for structure.
-- All prompts, flow, and menu labels are customizable.
+---
 
-## Peer Dependencies
-- You must install `telegraf` (version >=4.0.0) in your project.
-- The library now requires Telegraf directly (no DI). For tests, use `proxyquire` to mock Telegraf.
+## 5. API Reference
 
-## Testing
-- Run `npm test` to execute the test suite (unit and e2e).
-- E2E tests cover Telegram and web flows using a mock Telegram API server.
-- Use `proxyquire` for mocking Telegraf in tests.
+### createCommAgent(config, secrets)
+Returns a Telegraf bot instance, fully wired with your config and flows.
 
-## License
+### handleLeadForwarding(bot, config, leadText, options)
+Forwards a lead to admin/agent according to config. `options` may include `{ ctx }` (Telegram) or `{ res }` (web).
+
+### createLeadWebServer(options)
+Returns an Express app with a `/lead` POST endpoint. See `src/server/web-server.js` for details.
+
+---
+
+## 6. Advanced: Extending & Testing
+
+- **Menus, callbacks, and flows**: Extend or override by editing `src/menus.js`, `src/callbackHandlers.js`, etc.
+- **Testing**: Use `npm test` for full unit and e2e coverage. E2E tests use instance-level mocking for Telegraf.
+- **Mocking**: For tests, mock `bot.telegram.sendMessage` at the instance level.
+
+---
+
+## 7. Troubleshooting
+
+- **Missing secrets/config**: Ensure all required fields are set in your config and secrets files.
+- **Telegraf errors**: Check that you have installed a compatible version of `telegraf` (>=4.0.0).
+- **Web server issues**: Confirm your Express app is running and receiving POST requests at `/lead`.
+
+---
+
+## 8. License
+
 MIT
