@@ -21,8 +21,7 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint .",
-    "test": "jest --runInBand",
-    
+    "test": "jest --runInBand"
   },
   "dependencies": {
     "cors": "^2.8.5",
