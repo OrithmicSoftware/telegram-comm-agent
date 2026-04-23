@@ -41,6 +41,12 @@ function createLeadWebServer({ BOT_TOKEN, ADMIN_CHAT_ID, AGENT_CHAT_ID, formatLe
 
   app.post('/lead', async (req, res) => {
     const { name, phone, message } = req.body;
+    // Validation: all fields required and must be non-empty strings
+    if (!name || typeof name !== 'string' || !name.trim() ||
+        !phone || typeof phone !== 'string' || !phone.trim() ||
+        !message || typeof message !== 'string' || !message.trim()) {
+      return res.status(400).json({ ok: false, error: 'Missing or empty required fields' });
+    }
     const msg = formatLead
       ? formatLead({ name, phone, message })
       : `New lead from website:\nName: ${name}\nPhone: ${phone}\nMessage: ${message}`;
