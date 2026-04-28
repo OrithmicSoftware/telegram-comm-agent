@@ -21,6 +21,9 @@ async function handleLeadForwarding(bot, config, leadText, options = {}) {
     return 'admin';
   } else {
     // 'ask' mode: prompt admin with inline buttons
+    if (!config.STRINGS || !config.STRINGS.FORWARD_BTN || !config.STRINGS.NO_FORWARD_BTN) {
+      throw new Error('FORWARD_BTN and NO_FORWARD_BTN must be defined in STRINGS for ask mode');
+    }
     await bot.telegram.sendMessage(config.ADMIN_CHAT_ID, leadText, {
       reply_markup: {
         inline_keyboard: [[
