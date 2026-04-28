@@ -5,8 +5,18 @@ const { buildMainMenu, buildServiceMenu } = require('./src/menus');
 const { handleCallbackQuery } = require('./src/callbackHandlers');
 const { makeProcessMessage } = require('./src/processMessage');
 const handleLeadForwarding = require('./src/handleLeadForwarding');
+const { initLogging } = require('./src/logging');
 
 function createCommAgent(config, secrets) {
+  // Optional logging setup
+  if (config && config.logging && config.logging.enable) {
+    initLogging({
+      logFile: config.logging.logFile,
+      maxLogLines: config.logging.maxLogLines,
+      enable: true,
+      logDir: config.logging.logDir
+    });
+  }
   if (typeof console !== 'undefined' && console.log) console.log('[comm-agent] createCommAgent called');
   if (!secrets.BOT_TOKEN || !secrets.ADMIN_CHAT_ID || !secrets.AGENT_CHAT_ID) {
     if (typeof console !== 'undefined' && console.error) console.error('[comm-agent] Missing required secrets:', secrets);
@@ -81,4 +91,4 @@ function createCommAgent(config, secrets) {
   return bot;
 }
 
-module.exports = { createCommAgent, handleLeadForwarding };
+module.exports = { createCommAgent, handleLeadForwarding, initLogging };
