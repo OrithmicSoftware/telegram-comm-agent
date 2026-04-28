@@ -41,8 +41,9 @@ describe('handleLeadForwarding', () => {
 		expect(opts.reply_markup).toBeDefined();
 		expect(opts.reply_markup.inline_keyboard[0][0].text).toBe('Forward');
 		expect(opts.reply_markup.inline_keyboard[0][1].text).toBe('No Forward');
-		expect(opts.reply_markup.inline_keyboard[0][0].callback_data).toMatch(/^forward_lead/);
-		expect(opts.reply_markup.inline_keyboard[0][1].callback_data).toMatch(/^no_forward_lead/);
+		// Should match new format: forward_lead:source:leadId (leadId is short)
+		expect(opts.reply_markup.inline_keyboard[0][0].callback_data).toMatch(/^forward_lead:test:[\w-]+$/);
+		expect(opts.reply_markup.inline_keyboard[0][1].callback_data).toMatch(/^no_forward_lead:test:[\w-]+$/);
 	});
 
 	it('throws if FORWARD_BTN or NO_FORWARD_BTN is missing in STRINGS', async () => {

@@ -24,11 +24,14 @@ async function handleLeadForwarding(bot, config, leadText, options = {}) {
     if (!config.STRINGS || !config.STRINGS.FORWARD_BTN || !config.STRINGS.NO_FORWARD_BTN) {
       throw new Error('FORWARD_BTN and NO_FORWARD_BTN must be defined in STRINGS for ask mode');
     }
+    // Use a short unique ID for callback_data
+    const { storeLead } = require('./leadStore');
+    const leadId = storeLead(leadText);
     await bot.telegram.sendMessage(config.ADMIN_CHAT_ID, leadText, {
       reply_markup: {
         inline_keyboard: [[
-          { text: config.STRINGS.FORWARD_BTN, callback_data: `forward_lead:${options.source || 'web'}:${Buffer.from(leadText).toString('base64')}` },
-          { text: config.STRINGS.NO_FORWARD_BTN, callback_data: `no_forward_lead:${options.source || 'web'}` }
+          { text: config.STRINGS.FORWARD_BTN, callback_data: `forward_lead:${options.source || 'web'}:${leadId}` },
+          { text: config.STRINGS.NO_FORWARD_BTN, callback_data: `no_forward_lead:${options.source || 'web'}:${leadId}` }
         ]]
       }
     });
