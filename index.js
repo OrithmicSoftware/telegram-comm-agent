@@ -1,11 +1,13 @@
 
 
+
 const { Telegraf } = require('telegraf');
 const { buildMainMenu, buildServiceMenu } = require('./src/menus');
 const { handleCallbackQuery } = require('./src/callbackHandlers');
 const { makeProcessMessage } = require('./src/processMessage');
 const handleLeadForwarding = require('./src/handleLeadForwarding');
 const { initLogging } = require('./src/logging');
+const { createLeadWebServer } = require('./src/server/web-server');
 
 function createCommAgent(config, secrets) {
   // Optional logging setup
@@ -91,4 +93,4 @@ function createCommAgent(config, secrets) {
   return bot;
 }
 
-module.exports = { createCommAgent, handleLeadForwarding, initLogging };
+module.exports = { createCommAgent, handleLeadForwarding, initLogging, createLeadWebServer };

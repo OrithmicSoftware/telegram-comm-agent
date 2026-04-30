@@ -25,7 +25,8 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "telegram-comm-agent": "github:OrithmicSoftware/telegram-comm-agent#v1.0.3"
   },
   "peerDependencies": {
     "telegraf": ">=4.0.0"
