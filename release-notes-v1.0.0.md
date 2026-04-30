@@ -1,5 +1,6 @@
-### v1.0.0
+-### v1.0.0
 
-Initial release.
-
-- test: remove empty test files, all tests passing
+- Initial release
+- Remove empty test files
+---
+---

@@ -1,4 +1,4 @@
-### v1.0.3
+-### v1.0.3
 
 - Refactor: all user/admin-facing strings and message templates moved to config for localization and maintainability
 - Add English defaults and remove all hardcoded fallbacks
@@ -7,3 +7,4 @@
 - Export createWebServer from main entry
 - Expanded tests for forwarding logic and callback_data
 - Release/tag workflow: tags/releases are now consistent and gapless
+---

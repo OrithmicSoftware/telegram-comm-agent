@@ -39,6 +39,13 @@ function createLeadWebServer({ BOT_TOKEN, ADMIN_CHAT_ID, AGENT_CHAT_ID, formatLe
     app.use(cors());
   }
 
+  // Healthcheck endpoint with version log
+  app.get('/health', (req, res) => {
+    const version = require('../../package.json').version;
+    console.log(`[comm-agent] /health called - version: ${version}`);
+    res.status(200).json({ status: 'ok', version });
+  });
+
   app.post('/lead', async (req, res) => {
     const { name, phone, message } = req.body;
     // Validation: all fields required and must be non-empty strings
@@ -61,9 +68,17 @@ function createLeadWebServer({ BOT_TOKEN, ADMIN_CHAT_ID, AGENT_CHAT_ID, formatLe
   });
 
   let server = null;
+
   if (port !== 0) {
     server = app.listen(port, () => {
-      console.log(`Web server listening on port ${server.address().port}`);
+      const version = require('../../package.json').version;
+      const endpoints = [
+        { method: 'GET', path: '/health' },
+        { method: 'POST', path: '/lead' }
+      ];
+      console.log(`[comm-agent] Web server v${version} listening on port ${server.address().port}`);
+      console.log('[comm-agent] Available endpoints:');
+      endpoints.forEach(e => console.log(`[comm-agent]   ${e.method} ${e.path}`));
     });
     return server;
   }
