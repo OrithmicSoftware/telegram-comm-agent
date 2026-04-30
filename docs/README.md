@@ -41,16 +41,18 @@ const bot = createCommAgent(config, secrets);
 bot.launch();
 ```
 
-### Web Server for /lead
+
+### Web Server for /lead (since v1.0.4)
 ```js
-const { createLeadWebServer } = require('telegram-comm-agent/web-server');
-const app = createLeadWebServer({
-	BOT_TOKEN: '...',
-	ADMIN_CHAT_ID: '...',
-	AGENT_CHAT_ID: '...'
+const { createLeadWebServer } = require('telegram-comm-agent');
+const server = createLeadWebServer({
+	BOT_TOKEN: 'your-bot-token',
+	ADMIN_CHAT_ID: 'admin-id',
+	AGENT_CHAT_ID: 'agent-id',
+	port: 3000 // or process.env.PORT
 });
-app.listen(3000);
 ```
+This enables direct HTTP integration for web forms and external lead sources.
 
 ### Custom Lead Forwarding
 ```js

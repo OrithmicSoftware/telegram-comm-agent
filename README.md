@@ -71,8 +71,22 @@ Creates and returns a Telegraf bot instance, fully wired with your config and fl
 ### `handleLeadForwarding(bot, config, leadText, options)`
 Forwards a lead to admin/agent according to your config. See [docs/README.md](docs/README.md) for details.
 
-### Web Server: `/lead` endpoint
-Use `require('telegram-comm-agent/web-server')` to get an Express app that accepts POSTed leads and forwards them to Telegram.
+
+### `createLeadWebServer(options)` (since v1.0.4)
+Creates and starts an Express web server with a `/lead` POST endpoint that forwards leads to Telegram.
+
+**Usage:**
+```js
+const { createLeadWebServer } = require('telegram-comm-agent');
+const server = createLeadWebServer({
+	BOT_TOKEN: 'your-bot-token',
+	ADMIN_CHAT_ID: 'admin-id',
+	AGENT_CHAT_ID: 'agent-id',
+	port: 3000 // or process.env.PORT
+});
+```
+
+This enables direct HTTP integration for web forms and external lead sources.
 
 ---
 
