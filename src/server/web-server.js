@@ -64,13 +64,13 @@ function createLeadWebServer({ BOT_TOKEN, ADMIN_CHAT_ID, AGENT_CHAT_ID, formatLe
   }
 
   app.post('/lead', async (req, res) => {
-    const { name, phone, service, message } = req.body;
-    // Validation: name and message are required; phone and service are optional
+    const { name, phone, service, message, source } = req.body;
+    // Validation: name and message are required; phone, service, source are optional
     if (!name || typeof name !== 'string' || !name.trim() ||
         !message || typeof message !== 'string' || !message.trim()) {
       return res.status(400).json({ ok: false, error: 'Missing or empty required fields' });
     }
-    const msg = buildLeadMessage({ name, ...(phone ? { phone } : {}), ...(service ? { service } : {}), message });
+    const msg = buildLeadMessage({ name, ...(phone ? { phone } : {}), ...(service ? { service } : {}), message, ...(source ? { source } : {}) });
     try {
       await handleLeadForwarding(bot, {
         ADMIN_CHAT_ID,
