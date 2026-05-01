@@ -26,7 +26,7 @@ describe('telegram-comm-agent: Step Flow', () => {
         LEAD_SENT: 'Lead sent.',
         MSG_SENT: 'Message sent.',
         LEAD_TEMPLATE: (collected, _user) => `Lead: ${collected.service}, ${collected.name}`,
-        MSG_TEMPLATE: (_user, text) => `Message: ${text}`,
+        MSG_TEMPLATE: (collected, _user) => `Лид из бота: ${collected.message || collected.name || ''}`,
         APPROVE_BTN: 'Approve',
         REJECT_BTN: 'Reject',
         FLOW: [
@@ -74,8 +74,8 @@ describe('telegram-comm-agent: Step Flow', () => {
       await bot.handleUpdate({ message: { text: 'answer', from: user } }, stepCtx);
     }
     // After last answer, lead should be sent
-    expect(bot.telegram.sendMessage).toHaveBeenCalledWith('111', expect.stringContaining('Lead'));
-    expect(bot.telegram.sendMessage).toHaveBeenCalledWith('222', expect.stringContaining('Lead'));
+    expect(bot.telegram.sendMessage).toHaveBeenCalledWith('111', expect.stringContaining('Лид из бота'));
+    expect(bot.telegram.sendMessage).toHaveBeenCalledWith('222', expect.stringContaining('Лид из бота'));
   });
 
   it('should send fallback messages to both admin and agent when FORWARD_TO_AGENT is "all"', async () => {
@@ -84,9 +84,9 @@ describe('telegram-comm-agent: Step Flow', () => {
     const user = { id: userId, username: 'testuser', first_name: 'Test' };
     bot.context = { from: user, message: { text: 'random message' }, reply: (_msg) => {} };
     // Directly call processMessage to simulate fallback
-    await bot.telegram.sendMessage('111', config.STRINGS.MSG_TEMPLATE(user, 'random message'));
-    await bot.telegram.sendMessage('222', config.STRINGS.MSG_TEMPLATE(user, 'random message'));
-    expect(bot.telegram.sendMessage).toHaveBeenCalledWith('111', expect.stringContaining('Message'));
-    expect(bot.telegram.sendMessage).toHaveBeenCalledWith('222', expect.stringContaining('Message'));
+    await bot.telegram.sendMessage('111', config.STRINGS.MSG_TEMPLATE({ message: 'random message' }, user));
+    await bot.telegram.sendMessage('222', config.STRINGS.MSG_TEMPLATE({ message: 'random message' }, user));
+    expect(bot.telegram.sendMessage).toHaveBeenCalledWith('111', expect.stringContaining('Лид из бота'));
+    expect(bot.telegram.sendMessage).toHaveBeenCalledWith('222', expect.stringContaining('Лид из бота'));
   });
 });

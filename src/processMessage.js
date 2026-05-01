@@ -54,7 +54,7 @@ function makeProcessMessage({ config, secrets, userStates, mainMenu, serviceMenu
       } else {
         const collected = { service: state.service };
         for (const f of flow) collected[f.field] = userStates[user.id][f.field] || text;
-        const leadText = config.STRINGS.LEAD_TEMPLATE(collected, user);
+        const leadText = config.STRINGS.MSG_TEMPLATE(collected, user);
         await handleLeadForwarding(bot, {
           ...config,
           ADMIN_CHAT_ID: secrets.ADMIN_CHAT_ID,
@@ -67,7 +67,8 @@ function makeProcessMessage({ config, secrets, userStates, mainMenu, serviceMenu
       }
     }
     if (typeof console !== 'undefined' && console.log) console.log('[comm-agent] Fallback message from', user && user.id, 'text:', text);
-    const msg = config.STRINGS.MSG_TEMPLATE(user, text);
+    // Use MSG_TEMPLATE from config, pass message text as collected and user for sender info
+    const msg = config.STRINGS.MSG_TEMPLATE ? config.STRINGS.MSG_TEMPLATE({ message: text }, user) : JSON.stringify(user, null, 2);
     await forwardMessage(bot, config, secrets, msg, {
       reply_markup: {
         inline_keyboard: [

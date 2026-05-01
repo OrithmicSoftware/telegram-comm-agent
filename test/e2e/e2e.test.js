@@ -15,7 +15,7 @@ describe('E2E: Telegram chat flow', () => {
 				INVALID_SERVICE: 'Invalid',
 				CHOOSE_SERVICE: 'Choose',
 				LEAD_TEMPLATE: (collected) => `Lead: ${collected.service}, ${collected.name}`,
-				MSG_TEMPLATE: (_user, text) => `Msg: ${text}`,
+				MSG_TEMPLATE: (collected, _user) => `Msg: ${collected.message || ''}`,
 				LEAD_SENT: 'Lead sent',
 				MSG_SENT: 'Msg sent',
 				APPROVE_BTN: 'Approve',
@@ -64,38 +64,33 @@ const { createLeadWebServer } = require('../../src/server/web-server');
 
 describe('E2E: /lead endpoint', () => {
 	let sentMessages;
-	let app;
 
 	beforeEach(() => {
 		sentMessages = [];
-		// Inject a botInstance with a mocked telegram.sendMessage
+	});
+
+	it('should forward lead to both admin and agent (all mode)', async () => {
 		const botInstance = {
 			telegram: {
-				sendMessage: jest.fn((chatId, msg) => {
-					sentMessages.push({ chatId, msg });
+				sendMessage: jest.fn((chatId, msg, opts) => {
+					sentMessages.push({ chatId, msg, opts });
 					return Promise.resolve();
 				})
 			}
 		};
-		app = createLeadWebServer({
+		const appAll = createLeadWebServer({
 			BOT_TOKEN: 'test-token',
 			ADMIN_CHAT_ID: 'admin-id',
 			AGENT_CHAT_ID: 'agent-id',
-			port: 0, // do not listen
-			botInstance
+			port: 0,
+			botInstance,
+			FORWARD_TO_AGENT: 'all',
+			STRINGS: { FORWARD_BTN: 'Forward', NO_FORWARD_BTN: 'No Forward' }
 		});
-	});
-
-	it('should forward lead to both admin and agent', async () => {
 		const lead = { name: 'John', phone: '123', message: 'Test lead' };
-		await supertest(app)
-			.post('/lead')
-			.send(lead)
-			.expect(200)
-			.expect(res => {
-				expect(res.body.ok).toBe(true);
-			});
-
+		await supertest(appAll).post('/lead').send(lead).expect(200).expect(res => {
+			expect(res.body.ok).toBe(true);
+		});
 		expect(sentMessages.length).toBe(2);
 		const adminMsg = sentMessages.find(m => m.chatId === 'admin-id');
 		const agentMsg = sentMessages.find(m => m.chatId === 'agent-id');
@@ -103,6 +98,65 @@ describe('E2E: /lead endpoint', () => {
 		expect(agentMsg).toBeTruthy();
 		expect(adminMsg.msg).toContain('John');
 		expect(agentMsg.msg).toContain('John');
+	});
+
+	it('should forward lead to admin only with inline keyboard (ask mode)', async () => {
+		const botInstance = {
+			telegram: {
+				sendMessage: jest.fn((chatId, msg, opts) => {
+					sentMessages.push({ chatId, msg, opts });
+					return Promise.resolve();
+				})
+			}
+		};
+		const appAsk = createLeadWebServer({
+			BOT_TOKEN: 'test-token',
+			ADMIN_CHAT_ID: 'admin-id',
+			AGENT_CHAT_ID: 'agent-id',
+			port: 0,
+			botInstance,
+			FORWARD_TO_AGENT: 'ask',
+			STRINGS: { FORWARD_BTN: 'Forward', NO_FORWARD_BTN: 'No Forward' }
+		});
+		const lead = { name: 'John', phone: '123', message: 'Test lead' };
+		await supertest(appAsk).post('/lead').send(lead).expect(200).expect(res => {
+			expect(res.body.ok).toBe(true);
+		});
+		expect(sentMessages.length).toBe(1);
+		const adminMsg = sentMessages.find(m => m.chatId === 'admin-id');
+		expect(adminMsg).toBeTruthy();
+		expect(adminMsg.msg).toContain('John');
+		expect(adminMsg.opts).toBeDefined();
+		expect(adminMsg.opts.reply_markup).toBeDefined();
+	});
+
+	it('should forward lead to admin only (no mode)', async () => {
+		const botInstance = {
+			telegram: {
+				sendMessage: jest.fn((chatId, msg, opts) => {
+					sentMessages.push({ chatId, msg, opts });
+					return Promise.resolve();
+				})
+			}
+		};
+		const appNo = createLeadWebServer({
+			BOT_TOKEN: 'test-token',
+			ADMIN_CHAT_ID: 'admin-id',
+			AGENT_CHAT_ID: 'agent-id',
+			port: 0,
+			botInstance,
+			FORWARD_TO_AGENT: 'no',
+			STRINGS: { FORWARD_BTN: 'Forward', NO_FORWARD_BTN: 'No Forward' }
+		});
+		const lead = { name: 'John', phone: '123', message: 'Test lead' };
+		await supertest(appNo).post('/lead').send(lead).expect(200).expect(res => {
+			expect(res.body.ok).toBe(true);
+		});
+		expect(sentMessages.length).toBe(1);
+		const adminMsg = sentMessages.find(m => m.chatId === 'admin-id');
+		expect(adminMsg).toBeTruthy();
+		expect(adminMsg.msg).toContain('John');
+		expect(adminMsg.opts).toBeUndefined();
 	});
 
 	it('should return 500 if sendMessage fails', async () => {
@@ -117,15 +171,19 @@ describe('E2E: /lead endpoint', () => {
 			ADMIN_CHAT_ID: 'admin-id',
 			AGENT_CHAT_ID: 'agent-id',
 			port: 0,
-			botInstance
+			botInstance,
+			STRINGS: {
+				FORWARD_BTN: 'Forward',
+				NO_FORWARD_BTN: 'No Forward'
+			}
 		});
-		await supertest(appFail)
+		return supertest(appFail)
 			.post('/lead')
 			.send({ name: 'X', phone: 'Y', message: 'Z' })
 			.expect(500)
 			.expect(res => {
 				expect(res.body.ok).toBe(false);
-				expect(res.body.error).toMatch(/fail/);
+				expect(res.body.error).toBe('fail');
 			});
 	});
 });

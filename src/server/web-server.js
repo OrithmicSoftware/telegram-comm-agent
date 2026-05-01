@@ -46,6 +46,8 @@ function createLeadWebServer({ BOT_TOKEN, ADMIN_CHAT_ID, AGENT_CHAT_ID, formatLe
     res.status(200).json({ status: 'ok', version });
   });
 
+  // Use handleLeadForwarding for all forwarding logic (supports 'ask' mode)
+  const handleLeadForwarding = require('../handleLeadForwarding');
   app.post('/lead', async (req, res) => {
     const { name, phone, message } = req.body;
     // Validation: all fields required and must be non-empty strings
@@ -57,10 +59,16 @@ function createLeadWebServer({ BOT_TOKEN, ADMIN_CHAT_ID, AGENT_CHAT_ID, formatLe
     const msg = formatLead
       ? formatLead({ name, phone, message })
       : `New lead from website:\nName: ${name}\nPhone: ${phone}\nMessage: ${message}`;
+    // Use STRINGS from options if provided, fallback to empty object
+    const STRINGS = arguments[0].STRINGS || {};
+    const FORWARD_TO_AGENT = arguments[0].FORWARD_TO_AGENT || process.env.FORWARD_TO_AGENT || 'ask';
     try {
-      await bot.telegram.sendMessage(ADMIN_CHAT_ID, msg);
-      await bot.telegram.sendMessage(AGENT_CHAT_ID, msg);
-      res.json({ ok: true });
+      await handleLeadForwarding(bot, {
+        ADMIN_CHAT_ID,
+        AGENT_CHAT_ID,
+        FORWARD_TO_AGENT,
+        STRINGS
+      }, msg, { res, source: 'web' });
     } catch (err) {
       console.error('Error sending lead:', err);
       res.status(500).json({ ok: false, error: err.message });

@@ -5,7 +5,8 @@ describe('createLeadWebServer', () => {
   it('throws if missing secrets', () => {
     expect(() => createLeadWebServer({})).toThrow();
   });
-  it('forwards lead to both admin and agent', async () => {
+
+  it('forwards lead to both admin and agent (all mode)', async () => {
     const botInstance = {
       telegram: {
         sendMessage: jest.fn().mockResolvedValue(true),
@@ -17,6 +18,11 @@ describe('createLeadWebServer', () => {
       AGENT_CHAT_ID: 'agent',
       botInstance,
       port: 0,
+      FORWARD_TO_AGENT: 'all',
+      STRINGS: {
+        FORWARD_BTN: 'Forward',
+        NO_FORWARD_BTN: 'No Forward'
+      }
     });
     await request(app)
       .post('/lead')
@@ -24,6 +30,62 @@ describe('createLeadWebServer', () => {
       .expect(200);
     expect(botInstance.telegram.sendMessage).toHaveBeenCalledWith('admin', expect.any(String));
     expect(botInstance.telegram.sendMessage).toHaveBeenCalledWith('agent', expect.any(String));
+  });
+
+  it('forwards lead to admin only with inline keyboard (ask mode)', async () => {
+    const botInstance = {
+      telegram: {
+        sendMessage: jest.fn().mockResolvedValue(true),
+      },
+    };
+    const app = createLeadWebServer({
+      BOT_TOKEN: 'token',
+      ADMIN_CHAT_ID: 'admin',
+      AGENT_CHAT_ID: 'agent',
+      botInstance,
+      port: 0,
+      FORWARD_TO_AGENT: 'ask',
+      STRINGS: {
+        FORWARD_BTN: 'Forward',
+        NO_FORWARD_BTN: 'No Forward'
+      }
+    });
+    await request(app)
+      .post('/lead')
+      .send({ name: 'n', phone: 'p', message: 'm' })
+      .expect(200);
+    expect(botInstance.telegram.sendMessage).toHaveBeenCalledWith(
+      'admin',
+      expect.any(String),
+      expect.objectContaining({ reply_markup: expect.any(Object) })
+    );
+    expect(botInstance.telegram.sendMessage).not.toHaveBeenCalledWith('agent', expect.anything());
+  });
+
+  it('forwards lead to admin only (no mode)', async () => {
+    const botInstance = {
+      telegram: {
+        sendMessage: jest.fn().mockResolvedValue(true),
+      },
+    };
+    const app = createLeadWebServer({
+      BOT_TOKEN: 'token',
+      ADMIN_CHAT_ID: 'admin',
+      AGENT_CHAT_ID: 'agent',
+      botInstance,
+      port: 0,
+      FORWARD_TO_AGENT: 'no',
+      STRINGS: {
+        FORWARD_BTN: 'Forward',
+        NO_FORWARD_BTN: 'No Forward'
+      }
+    });
+    await request(app)
+      .post('/lead')
+      .send({ name: 'n', phone: 'p', message: 'm' })
+      .expect(200);
+    expect(botInstance.telegram.sendMessage).toHaveBeenCalledWith('admin', expect.any(String));
+    expect(botInstance.telegram.sendMessage).not.toHaveBeenCalledWith('agent', expect.anything());
   });
   it('should reject missing or empty fields', async () => {
     const botInstance = {
@@ -37,6 +99,10 @@ describe('createLeadWebServer', () => {
       AGENT_CHAT_ID: 'agent',
       botInstance,
       port: 0,
+      STRINGS: {
+        FORWARD_BTN: 'Forward',
+        NO_FORWARD_BTN: 'No Forward'
+      }
     });
     const invalidLeads = [
       {},

@@ -17,6 +17,8 @@ describe('makeProcessMessage', () => {
 				MSG_SENT: 'Msg sent',
 				APPROVE_BTN: 'Approve',
 				REJECT_BTN: 'Reject',
+				FORWARD_BTN: 'Forward',
+				NO_FORWARD_BTN: 'No Forward',
 				FLOW: [ { field: 'name', prompt: 'Name?' } ],
 			},
 		};
