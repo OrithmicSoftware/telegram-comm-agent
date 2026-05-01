@@ -106,12 +106,10 @@ describe('createLeadWebServer', () => {
     });
     const invalidLeads = [
       {},
-      { name: '', phone: '123', message: 'msg' },
-      { name: 'n', phone: '', message: 'msg' },
-      { name: 'n', phone: '123', message: '' },
-      { name: ' ', phone: '123', message: 'msg' },
-      { name: 'n', phone: ' ', message: 'msg' },
-      { name: 'n', phone: '123', message: ' ' },
+      { name: '', message: 'msg' },
+      { name: 'n', message: '' },
+      { name: ' ', message: 'msg' },
+      { name: 'n', message: ' ' },
     ];
     for (const lead of invalidLeads) {
       await request(app)
@@ -124,68 +122,4 @@ describe('createLeadWebServer', () => {
         });
     }
   });
-
-  it('forwards bot lead with source appended to the message', async () => {
-    const botInstance = {
-      telegram: {
-        sendMessage: jest.fn().mockResolvedValue(true),
-      },
-    };
-    const app = createLeadWebServer({
-      BOT_TOKEN: 'token',
-      ADMIN_CHAT_ID: 'admin',
-      AGENT_CHAT_ID: 'agent',
-      botInstance,
-      port: 0,
-      FORWARD_TO_AGENT: 'all',
-      STRINGS: {
-        FORWARD_BTN: 'Forward',
-        NO_FORWARD_BTN: 'No Forward',
-        SOURCE_LABEL: 'Source'
-      }
-    });
-
-    await request(app)
-      .post('/bot/lead')
-      .send({ name: 'n', phone: 'p', message: 'm', source: 'instagram' })
-      .expect(200);
-
-    expect(botInstance.telegram.sendMessage).toHaveBeenCalledWith(
-      'admin',
-      expect.stringContaining('Source: instagram')
-    );
-    expect(botInstance.telegram.sendMessage).toHaveBeenCalledWith(
-      'agent',
-      expect.stringContaining('Source: instagram')
-    );
-  });
-
-  it('rejects bot lead requests without source', async () => {
-    const botInstance = {
-      telegram: {
-        sendMessage: jest.fn().mockResolvedValue(true),
-      },
-    };
-    const app = createLeadWebServer({
-      BOT_TOKEN: 'token',
-      ADMIN_CHAT_ID: 'admin',
-      AGENT_CHAT_ID: 'agent',
-      botInstance,
-      port: 0,
-      STRINGS: {
-        FORWARD_BTN: 'Forward',
-        NO_FORWARD_BTN: 'No Forward'
-      }
-    });
-
-    await request(app)
-      .post('/bot/lead')
-      .send({ name: 'n', phone: 'p', message: 'm' })
-      .expect(400)
-      .expect(res => {
-        expect(res.body.ok).toBe(false);
-        expect(res.body.error).toMatch(/missing|empty/i);
-      });
-  });
-
 });

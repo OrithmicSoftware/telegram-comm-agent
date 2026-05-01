@@ -1,6 +1,6 @@
 {
   "name": "telegram-comm-agent",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Generic, configurable Telegram communication agent bot template as a reusable library.",
   "main": "index.js",
   "exports": {
