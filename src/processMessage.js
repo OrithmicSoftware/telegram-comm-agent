@@ -38,7 +38,7 @@ function makeProcessMessage({ config, secrets, userStates, mainMenu, serviceMenu
         }
         return f;
       });
-      userStates[user.id] = { step: resolvedFlow[0].field, service: serviceKey, flow: resolvedFlow };
+      userStates[user.id] = { ...state, step: resolvedFlow[0].field, service: serviceKey, flow: resolvedFlow };
       await ctx.reply(resolvedFlow[0].prompt);
       return;
     }
@@ -53,6 +53,7 @@ function makeProcessMessage({ config, secrets, userStates, mainMenu, serviceMenu
         return;
       } else {
         const collected = { service: state.service };
+        if (state.source) collected.source = state.source;
         for (const f of flow) collected[f.field] = userStates[user.id][f.field] || text;
         const leadText = config.STRINGS.MSG_TEMPLATE(collected, user);
         await handleLeadForwarding(bot, {
@@ -68,7 +69,9 @@ function makeProcessMessage({ config, secrets, userStates, mainMenu, serviceMenu
     }
     if (typeof console !== 'undefined' && console.log) console.log('[comm-agent] Fallback message from', user && user.id, 'text:', text);
     // Use MSG_TEMPLATE from config, pass message text as collected and user for sender info
-    const msg = config.STRINGS.MSG_TEMPLATE ? config.STRINGS.MSG_TEMPLATE({ message: text }, user) : JSON.stringify(user, null, 2);
+    const msg = config.STRINGS.MSG_TEMPLATE
+      ? config.STRINGS.MSG_TEMPLATE({ message: text, ...(state && state.source ? { source: state.source } : {}) }, user)
+      : JSON.stringify(user, null, 2);
     await forwardMessage(bot, config, secrets, msg, {
       reply_markup: {
         inline_keyboard: [

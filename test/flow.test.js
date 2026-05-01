@@ -1,4 +1,3 @@
-
 const { createCommAgent } = require('../index');
 
 describe('telegram-comm-agent: Step Flow', () => {
@@ -26,7 +25,7 @@ describe('telegram-comm-agent: Step Flow', () => {
         LEAD_SENT: 'Lead sent.',
         MSG_SENT: 'Message sent.',
         LEAD_TEMPLATE: (collected, _user) => `Lead: ${collected.service}, ${collected.name}`,
-        MSG_TEMPLATE: (collected, _user) => `Лид из бота: ${collected.message || collected.name || ''}`,
+        MSG_TEMPLATE: (collected, _user) => `Лид из бота: ${collected.message || collected.name || ''}${collected.source ? `\nSource: ${collected.source}` : ''}`,
         APPROVE_BTN: 'Approve',
         REJECT_BTN: 'Reject',
         FLOW: [
@@ -88,5 +87,28 @@ describe('telegram-comm-agent: Step Flow', () => {
     await bot.telegram.sendMessage('222', config.STRINGS.MSG_TEMPLATE({ message: 'random message' }, user));
     expect(bot.telegram.sendMessage).toHaveBeenCalledWith('111', expect.stringContaining('Лид из бота'));
     expect(bot.telegram.sendMessage).toHaveBeenCalledWith('222', expect.stringContaining('Лид из бота'));
+  });
+
+  it('should preserve start source and append it to the bot lead', async () => {
+    bot.telegram.sendMessage = jest.fn(() => Promise.resolve(true));
+    secrets.FORWARD_TO_AGENT = 'no';
+    const user = { id: userId, username: 'testuser', first_name: 'Test' };
+
+    const ctxStart = { from: user, message: { text: '/start src_instagram' }, reply: jest.fn() };
+    await bot.handleUpdate({ message: { text: '/start src_instagram', from: user } }, ctxStart);
+
+    const ctxList = { from: user, message: { text: config.BUTTONS.SERVICE_LIST }, reply: jest.fn() };
+    await bot.handleUpdate({ message: { text: config.BUTTONS.SERVICE_LIST, from: user } }, ctxList);
+
+    const serviceText = Object.values(config.SERVICES)[0];
+    const ctxService = { from: user, message: { text: serviceText }, reply: jest.fn() };
+    await bot.handleUpdate({ message: { text: serviceText, from: user } }, ctxService);
+
+    for (let i = 0; i < config.STRINGS.FLOW.length; i++) {
+      const stepCtx = { from: user, message: { text: 'answer' }, reply: jest.fn() };
+      await bot.handleUpdate({ message: { text: 'answer', from: user } }, stepCtx);
+    }
+
+    expect(bot.telegram.sendMessage).toHaveBeenCalledWith('111', expect.stringContaining('Source: instagram'));
   });
 });

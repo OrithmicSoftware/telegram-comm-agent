@@ -1,6 +1,5 @@
 
 
-
 const { Telegraf } = require('telegraf');
 const { buildMainMenu, buildServiceMenu } = require('./src/menus');
 const { handleCallbackQuery } = require('./src/callbackHandlers');
@@ -8,6 +7,19 @@ const { makeProcessMessage } = require('./src/processMessage');
 const handleLeadForwarding = require('./src/handleLeadForwarding');
 const { initLogging } = require('./src/logging');
 const { createLeadWebServer } = require('./src/server/web-server');
+
+function extractSourceFromStartText(text) {
+  if (!text || typeof text !== 'string') {
+    return '';
+  }
+
+  const [, payload = ''] = text.trim().split(/\s+/, 2);
+  if (!payload.startsWith('src_')) {
+    return '';
+  }
+
+  return payload.slice(4);
+}
 
 function createCommAgent(config, secrets) {
   // Optional logging setup
@@ -34,11 +46,15 @@ function createCommAgent(config, secrets) {
 
   bot.start(async (ctx) => {
     if (typeof console !== 'undefined' && console.log) console.log('[comm-agent] /start received from', ctx.from && ctx.from.id);
+    const source = extractSourceFromStartText(ctx.message && ctx.message.text);
+    if (source) {
+      userStates[ctx.from.id] = { ...(userStates[ctx.from.id] || {}), source };
+    }
     await ctx.reply(config.STRINGS.WELCOME, mainMenu);
   });
   bot.hears(config.BUTTONS.SERVICE_LIST, async (ctx) => {
     if (typeof console !== 'undefined' && console.log) console.log('[comm-agent] SERVICE_LIST button from', ctx.from && ctx.from.id);
-    userStates[ctx.from.id] = { step: 'service' };
+    userStates[ctx.from.id] = { ...(userStates[ctx.from.id] || {}), step: 'service' };
     await ctx.reply(config.STRINGS.CHOOSE_SERVICE, serviceMenu);
   });
   bot.hears(config.BUTTONS.CONTACT, async (ctx) => {
@@ -67,12 +83,16 @@ function createCommAgent(config, secrets) {
         providedCtx.telegram = providedCtx.telegram || bot.telegram;
         providedCtx.message = { ...update.message, from: providedCtx.from };
         const text = providedCtx.message && providedCtx.message.text ? providedCtx.message.text : '';
-        if (text === '/start') {
+        if (text.startsWith('/start')) {
+          const source = extractSourceFromStartText(text);
+          if (source) {
+            userStates[providedCtx.from.id] = { ...(userStates[providedCtx.from.id] || {}), source };
+          }
           await providedCtx.reply(config.STRINGS.WELCOME, mainMenu);
           return;
         }
         if (text === config.BUTTONS.SERVICE_LIST) {
-          userStates[providedCtx.from.id] = { step: 'service' };
+          userStates[providedCtx.from.id] = { ...(userStates[providedCtx.from.id] || {}), step: 'service' };
           await providedCtx.reply(config.STRINGS.CHOOSE_SERVICE, serviceMenu);
           return;
         }
@@ -93,4 +113,4 @@ function createCommAgent(config, secrets) {
   return bot;
 }
 
-module.exports = { createCommAgent, handleLeadForwarding, initLogging, createLeadWebServer };
+module.exports = { createCommAgent, handleLeadForwarding, initLogging, createLeadWebServer, extractSourceFromStartText };

@@ -48,6 +48,21 @@ function createLeadWebServer({ BOT_TOKEN, ADMIN_CHAT_ID, AGENT_CHAT_ID, formatLe
 
   // Use handleLeadForwarding for all forwarding logic (supports 'ask' mode)
   const handleLeadForwarding = require('../handleLeadForwarding');
+  const STRINGS = arguments[0].STRINGS || {};
+  const FORWARD_TO_AGENT = arguments[0].FORWARD_TO_AGENT || process.env.FORWARD_TO_AGENT || 'ask';
+
+  function buildLeadMessage(lead, source) {
+    const msg = formatLead
+      ? formatLead(lead)
+      : `New lead from website:\nName: ${lead.name}\nPhone: ${lead.phone}\nMessage: ${lead.message}`;
+
+    if (!source || typeof source !== 'string' || !source.trim()) {
+      return msg;
+    }
+
+    return `${msg}\n${STRINGS.SOURCE_LABEL || 'Source'}: ${source.trim()}`;
+  }
+
   app.post('/lead', async (req, res) => {
     const { name, phone, message } = req.body;
     // Validation: all fields required and must be non-empty strings
@@ -56,12 +71,7 @@ function createLeadWebServer({ BOT_TOKEN, ADMIN_CHAT_ID, AGENT_CHAT_ID, formatLe
         !message || typeof message !== 'string' || !message.trim()) {
       return res.status(400).json({ ok: false, error: 'Missing or empty required fields' });
     }
-    const msg = formatLead
-      ? formatLead({ name, phone, message })
-      : `New lead from website:\nName: ${name}\nPhone: ${phone}\nMessage: ${message}`;
-    // Use STRINGS from options if provided, fallback to empty object
-    const STRINGS = arguments[0].STRINGS || {};
-    const FORWARD_TO_AGENT = arguments[0].FORWARD_TO_AGENT || process.env.FORWARD_TO_AGENT || 'ask';
+    const msg = buildLeadMessage({ name, phone, message });
     try {
       await handleLeadForwarding(bot, {
         ADMIN_CHAT_ID,
@@ -75,6 +85,30 @@ function createLeadWebServer({ BOT_TOKEN, ADMIN_CHAT_ID, AGENT_CHAT_ID, formatLe
     }
   });
 
+  app.post('/bot/lead', async (req, res) => {
+    const { name, phone, message, source } = req.body;
+    if (!name || typeof name !== 'string' || !name.trim() ||
+        !phone || typeof phone !== 'string' || !phone.trim() ||
+        !message || typeof message !== 'string' || !message.trim() ||
+        !source || typeof source !== 'string' || !source.trim()) {
+      return res.status(400).json({ ok: false, error: 'Missing or empty required fields' });
+    }
+
+    const msg = buildLeadMessage({ name, phone, message }, source);
+
+    try {
+      await handleLeadForwarding(bot, {
+        ADMIN_CHAT_ID,
+        AGENT_CHAT_ID,
+        FORWARD_TO_AGENT,
+        STRINGS
+      }, msg, { res, source: source.trim() });
+    } catch (err) {
+      console.error('Error sending bot lead:', err);
+      res.status(500).json({ ok: false, error: err.message });
+    }
+  });
+
   let server = null;
 
   if (port !== 0) {
@@ -82,7 +116,8 @@ function createLeadWebServer({ BOT_TOKEN, ADMIN_CHAT_ID, AGENT_CHAT_ID, formatLe
       const version = require('../../package.json').version;
       const endpoints = [
         { method: 'GET', path: '/health' },
-        { method: 'POST', path: '/lead' }
+        { method: 'POST', path: '/lead' },
+        { method: 'POST', path: '/bot/lead' }
       ];
       console.log(`[comm-agent] Web server v${version} listening on port ${server.address().port}`);
       console.log('[comm-agent] Available endpoints:');
