@@ -87,6 +87,28 @@ describe('createLeadWebServer', () => {
     expect(botInstance.telegram.sendMessage).toHaveBeenCalledWith('admin', expect.any(String));
     expect(botInstance.telegram.sendMessage).not.toHaveBeenCalledWith('agent', expect.anything());
   });
+  it('GET / returns application manifest', async () => {
+    const botInstance = { telegram: { sendMessage: jest.fn() } };
+    const app = createLeadWebServer({
+      BOT_TOKEN: 'token',
+      ADMIN_CHAT_ID: 'admin',
+      AGENT_CHAT_ID: 'agent',
+      botInstance,
+      port: 0,
+    });
+    const res = await request(app).get('/').expect(200);
+    expect(res.body).toMatchObject({
+      name: expect.any(String),
+      version: expect.any(String),
+      description: expect.any(String),
+      endpoints: expect.arrayContaining([
+        expect.objectContaining({ method: 'GET', path: '/' }),
+        expect.objectContaining({ method: 'GET', path: '/health' }),
+        expect.objectContaining({ method: 'POST', path: '/lead' }),
+      ]),
+    });
+  });
+
   it('should reject missing or empty fields', async () => {
     const botInstance = {
       telegram: {

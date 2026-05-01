@@ -39,6 +39,22 @@ function createLeadWebServer({ BOT_TOKEN, ADMIN_CHAT_ID, AGENT_CHAT_ID, formatLe
     app.use(cors());
   }
 
+  // Default endpoint: application manifest
+  app.get('/', (req, res) => {
+    const { name, version, description } = require('../../package.json');
+    res.status(200).json({
+      name,
+      version,
+      description,
+      endpoints: [
+        { method: 'GET',  path: '/',       description: 'Application manifest' },
+        { method: 'GET',  path: '/health', description: 'Health check' },
+        { method: 'GET',  path: '/track',  description: 'Click-tracking redirect' },
+        { method: 'POST', path: '/lead',   description: 'Submit a lead' }
+      ]
+    });
+  });
+
   // Healthcheck endpoint with version log
   app.get('/health', (req, res) => {
     const version = require('../../package.json').version;
@@ -109,7 +125,9 @@ function createLeadWebServer({ BOT_TOKEN, ADMIN_CHAT_ID, AGENT_CHAT_ID, formatLe
     server = app.listen(port, () => {
       const version = require('../../package.json').version;
       const endpoints = [
+        { method: 'GET', path: '/' },
         { method: 'GET', path: '/health' },
+        { method: 'GET', path: '/track' },
         { method: 'POST', path: '/lead' }
       ];
       console.log(`[comm-agent] Web server v${version} listening on port ${server.address().port}`);
