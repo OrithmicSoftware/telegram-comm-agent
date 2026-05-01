@@ -63,14 +63,33 @@ function createLeadWebServer({ BOT_TOKEN, ADMIN_CHAT_ID, AGENT_CHAT_ID, formatLe
     return `${msg}\n${STRINGS.SOURCE_LABEL || 'Source'}: ${source.trim()}`;
   }
 
+  // Click-tracking redirect endpoint
+  // GET /track?source=youtube01&to=telegram  → logs click, redirects to destination
+  const TRACK_DESTINATIONS = (arguments[0].TRACK_DESTINATIONS) || {};
+  app.get('/track', async (req, res) => {
+    const source = (req.query.source || 'unknown').trim();
+    const to = (req.query.to || '').trim();
+    const dest = TRACK_DESTINATIONS[to];
+    if (!dest) {
+      return res.status(400).json({ ok: false, error: `Unknown destination: ${to}` });
+    }
+    try {
+      const msg = `🔗 Клик по ссылке\nИсточник: ${source}\nКуда: ${to}`;
+      await bot.telegram.sendMessage(ADMIN_CHAT_ID, msg);
+    } catch (err) {
+      console.warn('[comm-agent] /track notify failed:', err.message);
+    }
+    return res.redirect(302, dest);
+  });
+
   app.post('/lead', async (req, res) => {
-    const { name, phone, service, message, source } = req.body;
-    // Validation: name and message are required; phone, service, source are optional
+    const { name, phone, service, message } = req.body;
+    // Validation: name and message are required; phone and service are optional
     if (!name || typeof name !== 'string' || !name.trim() ||
         !message || typeof message !== 'string' || !message.trim()) {
       return res.status(400).json({ ok: false, error: 'Missing or empty required fields' });
     }
-    const msg = buildLeadMessage({ name, ...(phone ? { phone } : {}), ...(service ? { service } : {}), message, ...(source ? { source } : {}) });
+    const msg = buildLeadMessage({ name, ...(phone ? { phone } : {}), ...(service ? { service } : {}), message });
     try {
       await handleLeadForwarding(bot, {
         ADMIN_CHAT_ID,
